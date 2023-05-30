@@ -411,3 +411,66 @@ funcionar corretamente para esse fild também!
             return animeService.listAll();
         }
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 08 - Método GET parte 2]:
+
+- Adicionando resposta HTTP no controller com ResponseEntity<>();
+
+    * Antes:
+    @GetMapping
+    public List<Anime> list() {
+        ...
+        return animeService.listAll();
+    }
+
+    * Depois:
+    @GetMapping
+    public ResponseEntity<List<Anime>> list() {
+        ...
+        return new ResponseEntity<>(animeService.listAll(), HttpStatus.OK);
+        // return ResponseEntity.ok(animeService.listAll());
+    }
+
+
+---> Problemas quando temos mais de um GetMapping sem contexto:
+Neste cenário o Spring não saberá qual método chamar quando rolar GET em animes:
+
+    @GetMapping
+    public ResponseEntity<List<Anime>> list() {
+       ...
+    }
+    @GetMapping
+    public ResponseEntity<Anime> findById() {
+        ...
+    }
+
+- Solução: Adicionar um contexto de path variable para algum dos GET:
+
+    @GetMapping(path="/{id}")
+    public ResponseEntity<Anime> findById(@PathVariable long id) {
+        ...
+    }
+
+---> Criaremos o método findById no serviço, e em casos de notFound
+devemos retornar response HTTP correspondente com Throws new Exception:
+
+     public Anime findById(long id) {
+        return animeList.stream()
+                .filter(anime -> anime.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                                               "Anime Not Found"));
+    }
+
+---> Devemos configurar o Spring para não enviar tôdo o StackTrace em casos de Exceptions
+para o Frontend:
+
+- Primeiro devemos criar o arquivo de conf em resources:
+Alterar o application.properties para application.yml
+e setar:
+
+    server:
+      error:
+        include-stacktrace: never // ou on_trace_param ai basta incluir ?trace=true na URL
+                                  // http://localhost:8080/animes/12?trace=true

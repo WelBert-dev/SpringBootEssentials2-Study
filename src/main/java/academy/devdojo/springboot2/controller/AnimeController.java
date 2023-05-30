@@ -7,13 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 // COM Contexto anime:
 @Log4j2
@@ -35,8 +35,13 @@ public class AnimeController {
 //    @RequestMapping(method = RequestMethod.GET, path = "list")
     // Novo jeito elegante:
     @GetMapping
-    public List<Anime> list() {
+    public ResponseEntity<List<Anime>> list() {
         log.info("\n\n\nDATA ATUAL FORMATADA: "+ dateUtil.formatLocalDateTimeToDatabaseStyle(LocalDateTime.now()));
-        return animeService.listAll();
+        return new ResponseEntity<>(animeService.listAll(), HttpStatus.OK);
+        // return ResponseEntity.ok(animeService.listAll());
+    }
+    @GetMapping(path="/{id}")
+    public ResponseEntity<Anime> findById(@PathVariable long id) {
+       return ResponseEntity.ok(animeService.findById(id));
     }
 }
