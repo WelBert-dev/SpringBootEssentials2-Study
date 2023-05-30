@@ -342,3 +342,12 @@ esse recurso possibilita subir a aplicação mais rápidamente.
 
 - Só de add essa depedência no POM ja habilita o HotSwap que faz a aplicação
 executar mais rápido e re-carrega a aplicação toda vez que buildar.
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 06 - Gerando projeto com start.spring.io]:
+https://start.spring.io/
+- Ao invés de utilizar o schema gerado, eu deixei o meu projeto equivalente a ele!
+
+- Add application.properties em resources;
+- Ajusta POM para algumas dependẽncias só serem consideradas em tempo de desenvolvimento;
+
