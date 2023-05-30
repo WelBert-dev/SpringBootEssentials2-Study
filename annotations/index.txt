@@ -1,0 +1,17 @@
+[Spring Boot Essentials 2 - Introdução ao curso.]:
+
+- Explicações sobre o curso, 2 pois ja teve o 1, porém esse esta mais atualizado!
+- Novos conteúdos (Exemplo: Criar uma imagem da aplicação e subir no docker);
+- Overview geral sobre o curso
+
+
+[Spring Boot 2 Essentials 01 - O que é Spring Boot]:
+
+- Criado pela galera da privaton, o intuito é criar app standalone (sem dependências, e iniciar rápidamente);
+- O Framework toma conta de todas as configurações por nós, poucas configurações são delegadas a nós;
+- Já vem com alguns servlet containers imbutidos (Tomcat, jetty, Undertow);
+- O Springboot gerencia as dependências através dos Starters, possuindo uma integração forte com o ecossistema Spring;
+- Ecossistema Spring: SpringBoot, Spring Framework, Spring Data, Spring Cloud, Spring Cloud Data Flow, Spring Security, dentre outros;
+- Facilmente integrados com o SpringBoot (Basta incluir a dependencia no Maven ou Gradle) e realizar as chamadas;
+- Um dos mais utilizados no mercado de trabalho, logo, temos bastante documentações e forums de discussões na web;
+- O curso cobre o essencial para iniciar no mundo Spring, cobrindo pelomenos 70% das necessidades;
