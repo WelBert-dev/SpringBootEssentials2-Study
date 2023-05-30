@@ -4,7 +4,7 @@
 - Novos conteúdos (Exemplo: Criar uma imagem da aplicação e subir no docker);
 - Overview geral sobre o curso
 
-
+-------------------------------------------------------------------------------
 [Spring Boot 2 Essentials 01 - O que é Spring Boot]:
 
 - Criado pela galera da privaton, o intuito é criar app standalone (sem dependências, e iniciar rápidamente);
@@ -15,3 +15,33 @@
 - Facilmente integrados com o SpringBoot (Basta incluir a dependencia no Maven ou Gradle) e realizar as chamadas;
 - Um dos mais utilizados no mercado de trabalho, logo, temos bastante documentações e forums de discussões na web;
 - O curso cobre o essencial para iniciar no mundo Spring, cobrindo pelomenos 70% das necessidades;
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 02 - Criando projeto na pedreiragem pt 01]:
+
+- Sem utilizar o starter.io do Spring;
+- Inicialmente o projeto inicia sem nada de frameworks (Maven e etc) apenas Java puro na versão 11;
+- Add framework (Maven) criando assim o arquivo xml POM e a arvore de diretórios no src;
+- Para o Spring gerenciar as dependências, devemos adicionar no pom:
+Obs: Para funcionar, o maven deve estar configurado corretamente no projeto!
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.0</version>
+    </parent>
+
+- Após adicionado o parent, podemos adicionar as dependências:
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
+
+- Para verificar todas as dependências do projeto ir em:
+    Botão direito na raiz do projeto > Open Module Settings (f4) > Libraries
+
+- Obs: Adicionamos primeiro o parent para que as dependências logo abaixo herdem as versões corretas do parent!
+
