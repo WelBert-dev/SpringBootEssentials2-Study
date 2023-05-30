@@ -202,3 +202,129 @@ Então basta gerar os getters and setters da classe de dominio Anime (Na qual es
 - Isso ocorre pois o Jackson que é a API especializada em Json, utiliza os métodos getters and setters
 para pegar os valores e criar a response String JSON!
 
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 04 - @Component, @Autowired, @SpringBootApplication]:
+
+@Autowried faz a injeção da dependência: Porém desse jeito não é recomendável por questões de segurança!
+O Ideal é injetar a dependência pelos setters ou pelo construtor!
+- A dependência injetada com @Autowired deve ser um Bean Spring trackeado!!
+- Então devemos annotar na classe DateUtil com @Component ou Outras anotações especializadas;
+
+    @Component
+    public class DateUtil {
+        ...
+    }
+
+    public class AnimeController {
+        @Autowired
+        private DateUtil dateUtil;
+        ...
+    }
+
+- Obs: O Spring só está conseguindo trackear a classe DateUtil pois estamos escaneando tudo
+apartir da raiz do projeto no ApplicationStarter.java com o
+@ComponentScan(basePackages = "academy.devdojo.springboot2");
+E como a classe está dentro do pacote util que está sendo trackeado, podemos realizar chamadas!
+
+---> Movendo a classe ApplicationStarter para a raiz do projeto, assim não precisamos mais
+forçar o scanner com o @ComponentScan(basePackages = "academy.devdojo.springboot2");
+
+- Movendo para a raiz do src do projeto, não precisamos mais indicar o path no @ComponentScan()
+pois ele assume como padrão o diretório em que se encontra a classe ApplicationStarter
+
+    @EnableAutoConfiguration
+    @ComponentScan
+    public class ApplicationStarter {
+        public static void main(String[] args) {
+            SpringApplication.run(ApplicationStarter.class, args);
+        }
+    }
+
+
+---> Adicionando o Lombok no projeto para utilizar o Log4J2:
+- Podemos tambem adicionar a Extensão do Lombok no projeto!
+
+- Obs: Não indicamos a versão pois o Spring irá gerenciar isso para nós!
+- Devemos habilitar na IDE o Annotation Processing;
+- E se não adicionar o arquivo log4j2.xml em resources, a saída do log será apenas o valor
+passado no log.info() e etc.. se quiser mais informações devemos adicionar o arquivo de
+configurações log4j2.yml!! mais informações no repositório de estudos Java avançado
+MaratonaJava-DevDojo no módulo JDBC (T_jdbc) aula258!
+Histórico do commit com maiores detalhes:
+https://github.com/WelBert-dev/MaratonaJava-DevDojo/commit/9e06ebafdac1e45420c4d6af3329041386013e80
+
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+    </dependency>
+
+
+- EXEMPLO do arquivo log4j2.xml em resources:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration status="INFO">
+        <Appenders>
+            <Console name="LogToConsole" target="SYSTEM_OUT">
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            </Console>
+        </Appenders>
+        <Loggers>
+            <!-- avoid duplicated logs with additivity=false -->
+            <Logger name="academy.devdojo" level="info" additivity="false">
+                <AppenderRef ref="LogToConsole"/>
+            </Logger>
+            <Root level="error">
+                <AppenderRef ref="LogToConsole"/>
+            </Root>
+        </Loggers>
+    </Configuration>
+
+
+---> Podemos também realizar a injeção de dependências pelo construtor!
+Basta gerar o construtor que alimente a dependência desejada, assim
+o próprio container Springboot irá gerenciar e injetar a dependência,
+desde que a Classe ainda esteja sendo trackeada pelo Spring sendo um Bean!
+
+- Podemos gerar o construtor na unha e ele faz a injeção, ou também
+podemos utilizar as anotações do Lombok para gerar o construtor automaticamente
+e assim o Spring irá também injetar as dependências corretamente:
+
+
+- @AllArgsConstructor: Cria um construtor que injeta em todos os campos;
+
+    @AllArgsConstructor
+    public class AnimeController {
+        private DateUtil dateUtil;
+        ...
+    }
+
+- @RequiredArgsConstructor: Cria um construtor que injeta apenas em campos finais.
+
+    @RequiredArgsConstructor
+    public class AnimeController {
+        private final DateUtil dateUtil;
+        ...
+    }
+
+---> Tôda aplicação Spring utiliza as anotações básicas no ApplicationStarter sendo elas:
+Essas anotações formam a base para criar um app Spring, aonde uma auto configura o básico
+para rodar, a outra possibilita o Spring escanear os códigos e trackear os beans e a outra
+é utilizada para configurações de segurança (@Configuration) no Filter Chain;
+
+    @EnableAutoConfiguration
+    @ComponentScan
+    @Configuration
+    public class ApplicationStarter {
+        public static void main(String[] args) {
+            SpringApplication.run(ApplicationStarter.class, args);
+        }
+    }
+
+- Então o Spring cria uma anotação que une todas essas em apenas uma sendo ela:
+
+    @SpringBootApplication
+    public class ApplicationStarter {
+        public static void main(String[] args) {
+            SpringApplication.run(ApplicationStarter.class, args);
+        }
+    }
