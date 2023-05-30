@@ -328,3 +328,17 @@ para rodar, a outra possibilita o Spring escanear os códigos e trackear os bean
             SpringApplication.run(ApplicationStarter.class, args);
         }
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 05 - Hot Swap com Spring Boot Devtools]:
+Dependências do SpringBoot para tempo de desenvolvimento, otimizando tarefas
+como re-bootar automaticamente o projeto ao alterar alguma classe por exemplo...
+esse recurso possibilita subir a aplicação mais rápidamente.
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+    </dependency>
+
+- Só de add essa depedência no POM ja habilita o HotSwap que faz a aplicação
+executar mais rápido e re-carrega a aplicação toda vez que buildar.
