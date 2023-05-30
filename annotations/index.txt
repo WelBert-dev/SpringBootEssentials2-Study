@@ -45,3 +45,160 @@ Obs: Para funcionar, o maven deve estar configurado corretamente no projeto!
 
 - Obs: Adicionamos primeiro o parent para que as dependências logo abaixo herdem as versões corretas do parent!
 
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 03 - Criando projeto na pedreiragem pt 02]:
+Dando start na aplicação Spring WEB!
+
+    package academy.devdojo.springboot2.start;
+
+    import org.springframework.boot.SpringApplication;
+
+    public class ApplicationStarter {
+        public static void main(String[] args) {
+            SpringApplication.run(ApplicationStarter.class, args);
+        }
+    }
+
+Dessa forma não funciona pois não utilizamos as anotações para tornar um Bean Spring!
+
+- Solução 01 - Mais genérica: Utilizar a annotation @EnableAutoConfiguration
+
+    package academy.devdojo.springboot2.start;
+
+    import org.springframework.boot.SpringApplication;
+    import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+
+    @EnableAutoConfiguration
+    public class ApplicationStarter {
+        public static void main(String[] args) {
+            SpringApplication.run(ApplicationStarter.class, args);
+        }
+    }
+
+Obs: Assim a aplicação inicia em 3.838 seconds, com o Quarkus podemos otimizar e reduzir drasticamente!
+
+---> Testando criando o primeiro Endpoint: package controller!
+Utilizaremos a annotation @RestController do SpringMVC para tornar AnimeController
+um Bean Spring especializado em API REST (Retornos Strings Json): CTRL + Click na annotation:
+- Assinatura da annotation @RestController:
+
+    @Target({ElementType.TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Controller
+    @ResponseBody
+    public @interface RestController {
+        @AliasFor(
+            annotation = Controller.class
+        )
+        String value() default "";
+    }
+
+- A diferença entre as anotações @RestController e @Controller é que a Rest adiciona um
+@ResponseBody que indica que o retorno é uma String ou seja o Objeto Json da resposta Rest!
+Diferente do @Controller que é mais genérico e não especializado em respostas Json REST
+
+- Assinatura da annotation @Controller:
+
+    @Target({ElementType.TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Component
+    public @interface Controller {
+        @AliasFor(
+            annotation = Component.class
+        )
+        String value() default "";
+    }
+
+---> Caso de problemas ao utilizar classes da API JAVA mais moderna, ou aumentar o language level,
+ou adicionar a dependência POM:
+
+     <properties>
+        <java.version>11</java.version>
+     </properties>
+
+
+---> Endpoint sem contexto: Quando não anotamos em nível de classe qual será o contexto do Endpoint:
+- Obs: @RequestMapping(method = RequestMethod.GET, path = "list") está defasado/obsoleto!
+- Novo jeito: @GetMapping(path="list")
+
+    // sem Contexto:
+    @RestController
+    public class AnimeController {
+
+        // Sem contexto:
+        //localhost:8080/list
+        @RequestMapping(method = RequestMethod.GET, path = "list")
+        public List<Anime> list() {
+            return List.of(new Anime("DBZ"),
+                           new Anime("Berserk"));
+        }
+    }
+
+---> Endpoint COM contexto: Quando anotamos em nível de classe:
+- Add @RequestMapping("contexto") a nível de classe:
+
+    // COM Contexto anime:
+    @RestController()
+    @RequestMapping("anime") // <- ADD AQUI
+    public class AnimeController {
+
+        // COM contexto:
+        //localhost:8080/anime/list
+        @RequestMapping(method = RequestMethod.GET, path = "list")
+        public List<Anime> list() {
+            return List.of(new Anime("DBZ"),
+                           new Anime("Berserk"));
+        }
+    }
+
+---> Utilizando o jeito novo: Substituindo @RequestMapping a nível de método para @GetMapping;
+
+    // COM Contexto anime:
+    @RestController()
+    @RequestMapping("anime")
+    public class AnimeController {
+
+        // COM contexto:
+        //localhost:8080/anime/list
+        // Defasado/obsoleto:
+    //    @RequestMapping(method = RequestMethod.GET, path = "list")
+        // Novo jeito elegante:
+        @GetMapping(path="list")
+        public List<Anime> list() {
+            return List.of(new Anime("DBZ"),
+                           new Anime("Berserk"));
+        }
+    }
+
+---> Primeiro erro tentando acessar o Endpoint:
+
+    Whitelabel Error Page
+    This application has no explicit mapping for /error, so you are seeing this as a fallback.
+
+    Tue May 30 14:02:32 BRT 2023
+    There was an unexpected error (type=Not Found, status=404).
+
+- Isso ocorre pois o Spring deve reconhecer TODAS as classes como um Bean para assim ele gerenciar!
+- Ele reconhece isso através da hierarquia de pacotes, e se localiza pela classe "main" ApplicationStart
+- Não colocamos ela na raiz, logo ele não encontra!
+
+- Solução 01: Utilizando a anotação no ApplicationStarter.java indicando o path correto:
+Utilizando o @ComponentScan(basePackages = "academy.devdojo.springboot2")
+
+    Whitelabel Error Page
+    This application has no explicit mapping for /error, so you are seeing this as a fallback.
+
+    Tue May 30 14:13:11 BRT 2023
+    There was an unexpected error (type=Internal Server Error, status=500).
+
+- Agora o erro é outro (500): Erro de servidor, problema na serialização.
+Isso ocorre geralmente por problemas de não encontrar getters and setters!
+Então basta gerar os getters and setters da classe de dominio Anime (Na qual estamos gerando a List)
+
+    [{"name":"DBZ"},{"name":"Berserk"}]
+
+- Isso ocorre pois o Jackson que é a API especializada em Json, utiliza os métodos getters and setters
+para pegar os valores e criar a response String JSON!
+
