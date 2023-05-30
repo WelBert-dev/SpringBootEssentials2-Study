@@ -1,5 +1,6 @@
 package academy.devdojo.springboot2.controller;
 
+import academy.devdojo.springboot2.service.AnimeService;
 import academy.devdojo.springboot2.util.DateUtil;
 import academy.devdojo.springboot2.domain.Anime;
 import lombok.AllArgsConstructor;
@@ -17,25 +18,25 @@ import java.util.List;
 // COM Contexto anime:
 @Log4j2
 @RestController()
-@RequestMapping("anime")
+@RequestMapping("animes")
 @RequiredArgsConstructor
 public class AnimeController {
 //    @Autowired
     private final DateUtil dateUtil;
+    private final AnimeService animeService;
 
 //    public AnimeController(DateUtil dateUtil) {
 //        this.dateUtil = dateUtil;
 //    }
 
     // COM contexto:
-    //localhost:8080/anime/list
+    //localhost:8080/animes/
     // Defasado/obsoleto:
 //    @RequestMapping(method = RequestMethod.GET, path = "list")
     // Novo jeito elegante:
-    @GetMapping(path="list")
+    @GetMapping
     public List<Anime> list() {
         log.info("\n\n\nDATA ATUAL FORMATADA: "+ dateUtil.formatLocalDateTimeToDatabaseStyle(LocalDateTime.now()));
-        return List.of(new Anime("DBZ"),
-                       new Anime("Berserk"));
+        return animeService.listAll();
     }
 }

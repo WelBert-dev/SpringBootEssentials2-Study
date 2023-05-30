@@ -351,3 +351,63 @@ https://start.spring.io/
 - Add application.properties em resources;
 - Ajusta POM para algumas dependẽncias só serem consideradas em tempo de desenvolvimento;
 
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 07 - Método GET parte 1]:
+
+- Primeiro devemos alterar o nome do contexto no controller para o plural:
+
+    @RequestMapping("anime") // <- AQUI vamos deixar "animes"
+    @RequiredArgsConstructor
+    public class AnimeController {
+    ...
+    }
+
+- Também iremos remover o path do @GetMapping(path="list") pois agora ao executar GET no / do animes
+ele considera esse método!
+
+    * Antes:
+    @GetMapping(path="list")
+    public List<Anime> list() {
+      return List.of(new Anime("DBZ"),
+                     new Anime("Berserk"));
+    }
+
+    * Depois:
+    @GetMapping
+    public List<Anime> list() {
+      return List.of(new Anime("DBZ"),
+                     new Anime("Berserk"));
+    }
+
+- Também iremos retirar as regras de negócio do Controller e delegar para Service:
+
+- Para isso primeiro vamos remover todos getters e setters, e também o construtor
+da classe de dominio Anime, e adicionar a anotação @Data e @AllArgsConstructor
+para gerar:
+    - getters and setters;
+    - equals e hashcode;
+    - toString;
+
+    @Data
+    @AllArgsConstructor
+    public class Anime {
+        private Long id;
+        private String name;
+    }
+
+
+---> Devemos anotar o serviço com @Service e devemos injetar a dependência do Serviço
+tornando esse atributo também final para a anotação do Lombok @RequiredArgsConstructor
+funcionar corretamente para esse fild também!
+
+    @RequiredArgsConstructor // -> cria o construtor apenas para field final
+    public class AnimeController {
+        private final DateUtil dateUtil;
+        private final AnimeService animeService; // deixamos ele como "final" também
+
+        @GetMapping
+        public List<Anime> list() {
+            ...
+            return animeService.listAll();
+        }
+    }
