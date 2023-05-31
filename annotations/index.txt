@@ -474,3 +474,55 @@ e setar:
       error:
         include-stacktrace: never // ou on_trace_param ai basta incluir ?trace=true na URL
                                   // http://localhost:8080/animes/12?trace=true
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 09 - Método POST]:
+A depender do padrão adotado temos várias possibilidades de respostas para esse tipo,
+por exemplo: quando o método retorna algo ou não.
+
+- Podemos retornar um ID e retorna protocolo HTTP Status 201 CREATED;
+- Podemos retornar apenas 201 CREATED e sem Body na response;
+- Podemos retornar o Objeto criado inteiro ou um DTO que o represente;
+
+---> Quando mapeamos que estamos recebendo um Json no Body da request POST,
+podemos utilizar a anoatação @ e o Jackson irá mapear e converter o JSON
+do body para a Entidade correspondente no Java:
+
+    @PostMapping
+    public ResponseEntity<Anime> save(@RequestBody Anime anime) {
+        ...
+    }
+
+- Obs: Para que isso seja possivel as propriedades/atributos do body JSON deve ser
+EXATAMENTE igual a entidade correspondente do Java! caso contrario, para os
+campos que são diferentes o Jackson irá ignorar e deixar NULL!
+
+- SOLUÇÃO para quando o JSON do body for diferente da Entidade no java:
+Utilizar a anotação @JsonProperty("nome-que-vem-no-body-json")
+
+    @Data
+    @AllArgsConstructor
+    public class Anime {
+        private Long id;
+        @JsonProperty("name") // aqui mapeamos como vem no Body JSON
+        private String nameCharacter;
+    }
+
+---> Para retornar o protocolo 201 CREATED sem uma URI devemos fazer com new:
+
+    @PostMapping
+    public ResponseEntity<Anime> save(@RequestBody Anime anime) {
+        ...
+        return new ResponseEntity<>(animeService.save(anime), HttpStatus.CREATED);
+    }
+
+- Podemos também utilizar a anotação a nível de método:
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<Anime> save(@RequestBody Anime anime) {
+        ...
+        return new ResponseEntity<>(animeService.save(anime), HttpStatus.CREATED);
+    }
+
+- Instalamos o POSTMAN para testar esse Endpoint! Tudo certo ;D
