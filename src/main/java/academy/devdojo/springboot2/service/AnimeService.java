@@ -35,4 +35,8 @@ public class AnimeService {
 
         return anime;
     }
+
+    public void delete(long id) {
+       animesList.remove(findById(id)); // se existir ele remove, se não lança BAD_REQUEST
+    }
 }

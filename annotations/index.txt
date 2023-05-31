@@ -526,3 +526,40 @@ Utilizar a anotação @JsonProperty("nome-que-vem-no-body-json")
     }
 
 - Instalamos o POSTMAN para testar esse Endpoint! Tudo certo ;D
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 09 - Método DELETE]: NÃO FUNCIONAL AINDA LER DETALHES:
+- Referência normalizada para implementações dos metodos HTTP: RFC7231
+- Existem métodos Safes que são metodos que não alteram drasticamente o estado
+da aplicação, esses métodas são liberados sem precisar configurar.
+- DIFERENTE acontece com DELETE pois é non-safe, emtão devemos configurar
+manualmente liberando esse método!! além dele o PUT também!!
+
+- Resposta quando não tratado:
+
+    HttpRequestMethodNotSupportedException: Request method 'DELETE' not supported
+
+- Tabela dos métodos e seus níveis de safedade:
+
+    +---------+------+------------+---------------+
+    | Method  | Safe | Idempotent | Reference     |
+    +---------+------+------------+---------------+
+    | CONNECT | no   | no         | Section 4.3.6 |
+    | DELETE  | no   | yes        | Section 4.3.5 |
+    | GET     | yes  | yes        | Section 4.3.1 |
+    | HEAD    | yes  | yes        | Section 4.3.2 |
+    | OPTIONS | yes  | yes        | Section 4.3.7 |
+    | POST    | no   | no         | Section 4.3.3 |
+    | PUT     | no   | yes        | Section 4.3.4 |
+    | TRACE   | yes  | yes        | Section 4.3.8 |
+    +---------+------+------------+---------------+
+
+- Pesquisar mais sobre Idempotent pois a depender do tipo de method HTTP em request
+e se ele pode alterar o estado da aplicação, podemos ter problemas na request!
+
+Deletando de acordo com o ID e podemos também seguir alguma convensão de retorno HTTP:
+
+- Podemos retornar um ID e retorna protocolo HTTP Status 204 NoContent;
+- Podemos retornar apenas 204 NoContent e sem Body na response;
+- Podemos o Objeto deletado inteiro ou um DTO que o represente;
+
+- OBS: ATÉ AQUI NÃO CONFIGURAMOS O MÉTODO DELETE NA API ENTÃO NÃO ESTÁ FUNCIONAAL AINDA!
