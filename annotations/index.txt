@@ -527,7 +527,7 @@ Utilizar a anotação @JsonProperty("nome-que-vem-no-body-json")
 
 - Instalamos o POSTMAN para testar esse Endpoint! Tudo certo ;D
 -------------------------------------------------------------------------------
-[Spring Boot 2 Essentials 09 - Método DELETE]: NÃO FUNCIONAL AINDA LER DETALHES:
+[Spring Boot 2 Essentials 10 - Método DELETE]: NÃO FUNCIONAL AINDA LER DETALHES:
 - Referência normalizada para implementações dos metodos HTTP: RFC7231
 - Existem métodos Safes que são metodos que não alteram drasticamente o estado
 da aplicação, esses métodas são liberados sem precisar configurar.
@@ -563,3 +563,18 @@ Deletando de acordo com o ID e podemos também seguir alguma convensão de retor
 - Podemos o Objeto deletado inteiro ou um DTO que o represente;
 
 - OBS: ATÉ AQUI NÃO CONFIGURAMOS O MÉTODO DELETE NA API ENTÃO NÃO ESTÁ FUNCIONAAL AINDA!
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 11 - Método PUT]:
+Idempotente ou seja, toda evz que executado a resposta deve ser a mesma!
+
+- Podemos retornar um ID e retorna protocolo HTTP Status 204 NoContent;
+- Podemos retornar apenas 204 NoContent e sem Body na response;
+- Podemos o Objeto replaced inteiro ou um DTO que o represente;
+
+    @PutMapping
+    public ResponseEntity<Void> replace(@RequestBody Anime anime) {
+        animeService.replace(anime);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }

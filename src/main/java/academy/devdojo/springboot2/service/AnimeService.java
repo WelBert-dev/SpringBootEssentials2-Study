@@ -39,4 +39,10 @@ public class AnimeService {
     public void delete(long id) {
        animesList.remove(findById(id)); // se existir ele remove, se não lança BAD_REQUEST
     }
+
+    public void replace(Anime anime) {
+        delete(anime.getId());
+
+        animesList.add(anime);
+    }
 }
