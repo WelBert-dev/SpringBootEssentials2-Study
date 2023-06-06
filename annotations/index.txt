@@ -526,6 +526,7 @@ Utilizar a anotação @JsonProperty("nome-que-vem-no-body-json")
     }
 
 - Instalamos o POSTMAN para testar esse Endpoint! Tudo certo ;D
+
 -------------------------------------------------------------------------------
 [Spring Boot 2 Essentials 10 - Método DELETE]: NÃO FUNCIONAL AINDA LER DETALHES:
 - Referência normalizada para implementações dos metodos HTTP: RFC7231
@@ -578,3 +579,39 @@ Idempotente ou seja, toda evz que executado a resposta deve ser a mesma!
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 12 - Instalando Docker e executando container MySQL]:
+- Copiei o docker-compose do projeto Maratona-Java;
+
+1o - Criar o arquivo docker-compose.yml na raiz do projeto (configurações do container);
+2o - Rodar o container: docker-compose up (obs: . deve estar no diretório do arquivo anterior .yml);
+        - Caso não exista a imagem ainda, ele faz o download;
+
+3o - Verificando se o container esta running: docker ps;
+4o - Verificando TODOS containers disponíveis, até mesmo os que não estão running: docker ps -a;
+5o - Removendo containers pelo docker-compose: docker-compose down;
+6o - Mesmo removendo containers os volumes mapeados ainda ficam, para verificar: docker volume ls;
+
+---> Executando comandos no container:
+
+# Entra no container pelo shell corrente:
+docker exec -it container_id bash
+
+# Conecta com o mysql:
+mysql -uroot -p
+
+---> Adicionando dependências no projeto: pom.xml (Mysql v8.0.33)
+
+1o - https://mvnrepository.com/artifact/mysql/mysql-connector-java > Mysql v8.0.33 Connector Java;
+
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+
+2o - Reload Maven para baixar a dependencia adicionada acima (CTRL + SHIFT + O);
+
+3o - Verificando se as dependências foram baixadas com sucesso: Ir na raiz > `External Libraries`;
+
+4o - Após adicionar as dependências do mysql ao projeto, iremos criar a lógica de connection.
