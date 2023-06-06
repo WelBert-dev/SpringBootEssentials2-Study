@@ -615,3 +615,59 @@ mysql -uroot -p
 3o - Verificando se as dependências foram baixadas com sucesso: Ir na raiz > `External Libraries`;
 
 4o - Após adicionar as dependências do mysql ao projeto, iremos criar a lógica de connection.
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 13 - Spring Data JPA pt 01]:
+
+- Instala o JPA e o MysqlConnector (Já fiz na aula anterior sobre o mysql connector);
+
+Mapeando automaticamente e atualizando em tempo real os schemas das tabelas
+com o Spring Data JPA.
+
+- Database: db_anime_sprinboot2
+
+---> Adicionando dependências no projeto: pom.xml (Spring Data JPA v2.4.0)
+
+     <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+---> Atualiza o arquivo /resources/application.yml:
+
+    spring:
+      datasource:
+        url: jdbc:mysql://localhost:3306/db_anime_sprinboot2?useSSL=false&createDatabaseIsNotExists=true&allowPublicKeyRetrieval=true
+        username: root
+        password: root
+      jpa:
+        hibernate:
+          ddl-auto: update
+
+---> Transfromando o modelo de domínio Java em Entidade para mapear no banco:
+
+- Modifica o modelo de dominio /domain/Anime.java:
+    - Add a annotation em nível de classe: @Entity(name = "tbl_anime")
+    - Add a annotation em nível de atributo: @Id e @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Data
+    @AllArgsConstructor
+    @Entity(name = "tbl_anime")
+    public class Anime {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        private String name;
+    }
+
+    - Resultado após executado a aplicação:
+    Será criado uma tabela `tbl_anime` com o seguinte desc:
+
+    +-------+--------------+------+-----+---------+----------------+
+    | Field | Type         | Null | Key | Default | Extra          |
+    +-------+--------------+------+-----+---------+----------------+
+    | id    | bigint       | NO   | PRI | NULL    | auto_increment |
+    | name  | varchar(255) | YES  |     | NULL    |                |
+    +-------+--------------+------+-----+---------+----------------+
+
