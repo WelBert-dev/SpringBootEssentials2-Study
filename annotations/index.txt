@@ -671,3 +671,61 @@ com o Spring Data JPA.
     | name  | varchar(255) | YES  |     | NULL    |                |
     +-------+--------------+------+-----+---------+----------------+
 
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 14 - Spring Data JPA pt 02]:
+- Criando o AnimeRepository classe que faz as querys relacionadas a tabela Anime:
+- Aonde "Long" é o tipo da primary key
+- Não precisamos definir metodos pois ja estamos herdando os default (insert, update, find..)
+
+    public interface AnimeRepository extends JpaRepository<Anime, Long> {
+    }
+
+---> Devemos atualizar todos os metodos anteriores que utilizavam DB in Memory (List);
+
+---> Devemos criar as classes DTO correspondente para cada method http do request;
+
+    @Data
+    public class AnimePostRequestBodyDTO {
+        private String name;
+    }
+
+    @Data
+    public class AnimePutRequestBodyDTO {
+        private Long id;
+        private String name;
+    }
+
+---> Atualizar a Classe AnimeService para agora utilizar os métodos herdados do
+extends JpaRepository<Anime, Long> e mapear os campos do DTO para a Entidade Java.
+
+    @Service
+    @RequiredArgsConstructor
+    public class AnimeService {
+        private final AnimeRepository animeRepository;
+        ...
+    }
+
+    public Anime save(AnimePostRequestBodyDTO animeDTO) {
+        // Mapeia o DTO para a Entidade, e ja retorna o registro com o ID
+
+        return this.animeRepository.save(Anime.builder()
+                .name(animeDTO.getName()).build());
+    }
+
+---> Atualizar a Entidade de dominio Anime para não dar problemas no Jackson:
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor // <-- Tava dandoi erro de construtor padrão, porisso adicionei essa annotation
+    @Entity(name = "tbl_anime")
+    public class Anime {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        private String name;
+    }
+
+---> Pronto, agora a API esta acessando o Banco de dados Mysql nas consultas,
+além de manter os schemas e registros refletidos na aplicação e no banco.
