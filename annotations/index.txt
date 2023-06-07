@@ -819,3 +819,80 @@ devemos também adicionar PARA TODAS as dependências que utilizam esse proccess
                 </plugin>
             </plugins>
         </build>
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 16 - Request Params]: Parâmetros na URL ao invés do body da request
+
+---> Primeiro iremos definir o contrato List<Anime> findByName(String name) na
+interface AnimeRepository, apenas definir pois o próprio JPA irá implementar para nós!
+
+    public interface AnimeRepository extends JpaRepository<Anime, Long> {
+        List<Anime> findByName(String name);
+    }
+
+- O findByName deve corresponder com o atributo em questão da Entidade model!
+- Obs: Esse find gerado pelo JPA não é com LIKE, ou seja, o valor deve ser 100%
+equals (name == name);
+
+- Para visualizar a Query gerada pelo JPA basta flaggar com `show-sql: true`
+o application.yml:
+
+    server:
+      error:
+        include-stacktrace: on_trace_param
+
+    spring:
+      datasource:
+        url: jdbc:mysql://localhost:3306/db_anime_sprinboot2?useSSL=false&createDatabaseIsNotExists=true&allowPublicKeyRetrieval=true
+        username: root
+        password: root
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: true // <- AQUI!!
+
+---> Depois devemos espelhar o método na classe de Serviço:
+
+    public List<Anime> findByName(String name) {
+        return this.animeRepository.findByName(name);
+    }
+
+---> Depois iremos utilizar o serviço no Controlador:
+- A anotação @RequestParam é bem parecida com a @PathVariable mas o indicado é
+utilizar a @PathVariable quando não vamos passar vários params, se for passar
+muitos o indicado é utilizar a RequestParam!
+
+- A anotação @PathVariable o parâmetro é passado "seco" SEM o atributo=valor:
+
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<Anime> findById(@PathVariable long id) {
+       return ResponseEntity.ok(animeService.findByIdOrThrowBadRequestException(id));
+    }
+
+    - URL: http://localhost:8080/animes/2
+
+
+- Já a anotação @RequestParam o parâmetro é COMPOSTO por atributo=valor:
+
+    @GetMapping(path = "/find")
+    public ResponseEntity<List<Anime>> findByName(@RequestParam String name) {
+        return ResponseEntity.ok(animeService.findByName(name));
+    }
+
+    - URL: http://localhost:8080/animes/find?name=Naruto MAPPER UPDATER 12
+
+- Assim podemos empilhar vários parâmetros da seguinte forma:
+
+    @GetMapping(path = "/find")
+    public ResponseEntity<List<Anime>> findByName(@RequestParam String name, @RequestParam String id) {
+        return ResponseEntity.ok(animeService.findByName(name));
+    }
+
+    - URL: http://localhost:8080/animes/find?name=Naruto MAPPER UPDATER 12&id=12
+
+
+---> Argumentos do @RequestParam:
+
+- @RequestParam(defaultValue = ""): Valor padrão;
+- @RequestParam(required = false): Obrigatório? se for, return BAD REQUEST
+
