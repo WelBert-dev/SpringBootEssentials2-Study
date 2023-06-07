@@ -729,3 +729,93 @@ extends JpaRepository<Anime, Long> e mapear os campos do DTO para a Entidade Jav
 
 ---> Pronto, agora a API esta acessando o Banco de dados Mysql nas consultas,
 além de manter os schemas e registros refletidos na aplicação e no banco.
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 15 - Framework de Mapeamento MapStruct]:
+- Facilitando o mapeamento de DTO's para Entidades concretas;
+- Vantagem: Ele faz alguns tratamentos e validações por nós (null's e etc);
+- Obs: Os campos do DTO devem ser compatíveis com a Entidade model, ou devemos
+especificar com a anotação @Mapping(source = "nameDto", target = "nameEntity")
+indicando qual é o campo mapeado de um para outro;
+
+---> Adicionando dependências no projeto: pom.xml (MapStruct v1.5.5.Final):
+
+    <properties>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+    </properties>
+
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>${org.mapstruct.version}</version>
+    </dependency>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>11</source> <!-- depending on your project -->
+                    <target>11</target> <!-- depending on your project -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                        <!-- other annotation processors -->
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+---> Criaremos um pacote separado para definição de mapeamento `mapper`:
+
+    @Mapper(componentModel = "spring") // possibilita fazer dependency injection
+    public abstract class AnimeMapper {
+        public static final AnimeMapper INSTANCE = Mappers.getMapper(AnimeMapper.class);
+
+        public abstract Anime toAnime(AnimePostRequestBodyDTO animePostRequestBodyDTO);
+        public abstract Anime toAnime(AnimePutRequestBodyDTO putRequestBodyDTO);
+    }
+
+---> Realizando as chamadas no mapper ao invés de mapear manualmente:
+
+    public Anime save(AnimePostRequestBodyDTO animePostDTO) {
+        return this.animeRepository.save(AnimeMapper.INSTANCE.toAnime(animePostDTO));
+    }
+
+---> ATENÇÃO: Por adicionar as configurações de annotation proccessors do Mapper no POM
+devemos também adicionar PARA TODAS as dependências que utilizam esse proccessor!!
+
+- Neste caso devemos habilitar as annotation processor do Lombok:
+
+    <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <source>11</source> <!-- depending on your project -->
+                        <target>11</target> <!-- depending on your project -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${org.mapstruct.version}</version>
+                            </path>
+                            <!-- other annotation processors -->
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>

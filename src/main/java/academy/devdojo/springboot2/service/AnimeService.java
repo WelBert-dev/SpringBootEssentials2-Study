@@ -1,6 +1,7 @@
 package academy.devdojo.springboot2.service;
 
 import academy.devdojo.springboot2.domain.Anime;
+import academy.devdojo.springboot2.mapper.AnimeMapper;
 import academy.devdojo.springboot2.repository.AnimeRepository;
 import academy.devdojo.springboot2.requests.anime.AnimePostRequestBodyDTO;
 import academy.devdojo.springboot2.requests.anime.AnimePutRequestBodyDTO;
@@ -22,20 +23,19 @@ public class AnimeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                                                 "Anime Not Found"));
     }
-    public Anime save(AnimePostRequestBodyDTO animeDTO) {
-        // Mapeia o DTO para a Entidade, e ja retorna o registro com o ID
-
-        return this.animeRepository.save(Anime.builder()
-                .name(animeDTO.getName()).build());
+    public Anime save(AnimePostRequestBodyDTO animePostDTO) {
+        Anime anime = AnimeMapper.INSTANCE.toAnime(animePostDTO);
+        System.out.println(anime);
+        return this.animeRepository.save(anime);
     }
     public void delete(long id) {
         this.animeRepository.delete(findByIdOrThrowBadRequestException(id));
     }
-    public void replace(AnimePutRequestBodyDTO animeDTO) {
-        findByIdOrThrowBadRequestException(animeDTO.getId());
+    public void replace(AnimePutRequestBodyDTO animePutDTO) {
+        findByIdOrThrowBadRequestException(animePutDTO.getId());
 
-        this.animeRepository.save(Anime.builder()
-                .id(animeDTO.getId())
-                .name(animeDTO.getName()).build());
+        Anime anime = AnimeMapper.INSTANCE.toAnime(animePutDTO);
+        System.out.println(anime);
+        this.animeRepository.save(anime);
     }
 }
