@@ -896,3 +896,47 @@ muitos o indicado é utilizar a RequestParam!
 - @RequestParam(defaultValue = ""): Valor padrão;
 - @RequestParam(required = false): Obrigatório? se for, return BAD REQUEST
 
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 17 - Exceções Customizadas]: Criando Exceptions nas Response HTTP
+- O Tratamento de Exceptions vai depender do padrão adotado pelo projeto!
+- Não existe um caminho apenas, as melhores práticas é adotar um padrão para o tôdo.
+- Neste contexto iremos criar uma Exception personalizada para a Response HTTP BAD REQUEST
+- BadRequestException extends RuntimeException; Passando para o `super` a message do construtor;
+- Para não implementar na unha o Throw, utilizaremos @ResponseStatus(HttpStatus.BAD_REQUEST)
+a nível de classe na Exception customizada!
+- Assim não precisamos mais utilizar o genérico em Service:
+
+     new ResponseStatusException(HttpStatus.BAD_REQUEST,"Anime Not Found");
+
+- Agora com a Exception customizada, a chamada/resposta será menos verboso:
+
+    new BadRequestException("Anime Not Found");
+
+- Vantagens: Redução de Boilerplates e possibilidades de tratamentos personalizados!
+
+---> Primeiro iremos criar o diretório exceptions/httpRequest para centralizar essas
+customizações!
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public class BadRequestException extends RuntimeException {
+        public BadRequestException(String message) {
+            super(message);
+        }
+    }
+
+---> Depois basta substituir as chamadas no Service:
+
+    [ANTES DE UTILIZAR A EXCEPTION CUSTOMIZADA]:
+
+    public Anime findByIdOrThrowBadRequestException(long id) {
+        return this.animeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, // <- AQUI
+                                                                "Anime Not Found"));
+    }
+
+    [DEPOIS UTILIZANDO A EXCEPTION CUSTOMIZADA]:
+
+    public Anime findByIdOrThrowBadRequestException(long id) {
+        return this.animeRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Anime Not Found")); // <- BEM MELHOR
+    }
