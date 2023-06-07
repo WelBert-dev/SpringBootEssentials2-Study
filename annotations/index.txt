@@ -940,3 +940,86 @@ customizações!
         return this.animeRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Anime Not Found")); // <- BEM MELHOR
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 18 - Handler Global]: Personalizando campos do retorno
+Response HTTP Exception, ou seja, configurando manualmente o método que é
+executado quando lança alguma Exception relacionada ao Controller, por exemplo
+HTTP BAD REQUEST que criamos anteriormente!
+
+---> [ANTES] de personalizar, a resposta default do STATUS 400 é algo parecido com:
+
+    {
+        "timestamp": "2023-06-07T19:11:22.004+00:00",
+        "status": 400,
+        "error": "Bad Request",
+        "message": "Anime Not Found",
+        "path": "/animes/50"
+    }
+
+---> Primeiro iremos definir a classe que vai encapsular os campos personalizados
+deste retorno Response HTTP de acordo com o tipo de status code (400, 404 e etc)
+ou também podemos definir um genérico para todos, ou para um grupo seleto de status
+code em casos de campos similares ou iguais. (Utilizar o conceito de herança).
+
+- Iremos definir a classe no mesmo pacote do BadRequestException personalziado anterior.
+- Boas práticas de nomeclatura: TipoExceptionHTTPDetails: BadRequestExceptionDetails
+
+    @Data
+    @Builder
+    public class BadRequestExceptionDetails {
+        private String title;
+        private int status;
+        private String details;
+        private String developerMessage;
+        private LocalDateTime timestamp;
+        private String camposDoRetornoPersonalizado;
+    }
+
+- Após definir devemos indicar para todos os Controllers que desejamos utilizar ela
+toda vez que lançar uma Exception do tipo BadRequestException que criamos anteriormente!
+
+---> Devemos criar um pacote centralizado para essas configurações:
+handler/exceptions/httpRequest
+
+- A Classe será definida para lidar com qualquer request REST: RestExceptionHandler
+- Nesta classe de configuração iremos anotar a nível de classe com @ControllerAdvice
+para indicar ao Spring que está classe deve ser considerada no controlador para lidar
+com alguns cenários, esses cenários deveram ser "flaggados", ou seja, vamos utilizar
+outras anotações em nível de métodos paar indicar quais os cenários ele deve chamar
+esses métodos personalizados.
+- A Anotação que vamos utilizar para definir o cenário em que o Controller deve chamar
+o método definido por nós para tratar as Exceptions do tipo BadRequestException criado
+por nós anteriormente, e executar esse método toda vez que lançado ela, é a annotation
+@ExceptionHandler(BadRequestException.class):
+
+    @ControllerAdvice
+    public class RestExceptionHandler {
+
+        @ExceptionHandler(BadRequestException.class)
+        public ResponseEntity<BadRequestExceptionDetails> handlerBadRequestException(BadRequestException bre) {
+            return new ResponseEntity<>(
+                    BadRequestExceptionDetails.builder()
+                            .timestamp(LocalDateTime.now())
+                            .status(HttpStatus.BAD_REQUEST.value())
+                            .title("Bad Request Exception, Check the documentation!")
+                            .details(bre.getMessage())
+                            .developerMessage(bre.getClass().getName())
+                            .camposDoRetornoPersonalizado("HANDLER PERSONALIZADOOO! ;D").build()
+                    , HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+---> [RESULTADO] (Toda vez que lançar a exception BadRequestException criadas por
+nós anteriormente, será chamado esse método:
+- Obs: Fiz a mesma requisição que gerou o Response da seção "[ANTES] " logo a cima /\
+
+    {
+        "title": "Bad Request Exception, Check the documentation!",
+        "status": 400,
+        "details": "Anime Not Found",
+        "developerMessage": "academy.devdojo.springboot2.exceptions.httpRequest.BadRequestException",
+        "timestamp": "2023-06-07T16:42:45.408296358",
+        "camposDoRetornoPersonalizado": "HANDLER PERSONALIZADOOO! ;D"
+    }
