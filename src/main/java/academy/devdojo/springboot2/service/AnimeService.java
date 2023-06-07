@@ -8,6 +8,7 @@ import academy.devdojo.springboot2.requests.anime.AnimePostRequestBodyDTO;
 import academy.devdojo.springboot2.requests.anime.AnimePutRequestBodyDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Service
@@ -24,6 +25,7 @@ public class AnimeService {
         return this.animeRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Anime Not Found"));
     }
+    @Transactional
     public Anime save(AnimePostRequestBodyDTO animePostDTO) {
         Anime anime = AnimeMapper.INSTANCE.toAnime(animePostDTO);
         System.out.println(anime);

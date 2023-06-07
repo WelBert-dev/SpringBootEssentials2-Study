@@ -1023,3 +1023,51 @@ nós anteriormente, será chamado esse método:
         "timestamp": "2023-06-07T16:42:45.408296358",
         "camposDoRetornoPersonalizado": "HANDLER PERSONALIZADOOO! ;D"
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 19 - Transações]: Cancelando transações com o banco em
+casos de lançar Exceptions, ou seja, em alguns cenários não iremos querer
+persistir dados no banco em casos de ocorrer problemas, sem definir essas regras
+o padrão é mesmo se lançado, o código continua executando e salvando, por exemplo
+um registro no banco, coisa que não deveria ocorrer em casos de lançado Exceptions
+
+- Para resolver isso primeiro o banco deve possuir suporte para transações, podemos
+verificar esse recurso com o SQL: `show table status` e verificar se na coluna
+"Engine" temos o valor "InnoDB"; MYSQL POSSUÍ SUPORTE! ;D
+
+- Para indicar ao Spring que desejamos parar qualquer transação com o banco em casos
+de lançar Exception, utilizamos a annotation @Transactional no método que lança a
+Exception em questão! por padrão, sem utilizar nada no argumento da annotation o
+Spring só vai considerar essa flag em Exceptions do tipo Unchecked ou seja, Runtime
+Exceptions (Exceções lançadas em tempo de execução, as quais não samos como desenvolvedores
+obrigados a trata-las com blocos try-catch);
+
+- Para considerar esse tipo de Exception (Sem ser Runtime) as Checked devemos utilizar
+no argumento indicando para qual Exception Checked queremos considerar também!
+
+- OBS: A ANNOTATION É DO SPRING FRAMEWORK, NÃO DO JAVAX (POIS EXISTE UMA IGUAL NELE)
+CUIDADO NA HORA DE IMPORTAR!!!
+
+---> Como exemplo iremos definir essas regras no método save do AnimeService:
+
+    @Transactional
+    public Anime save(AnimePostRequestBodyDTO animePostDTO) {
+        Anime anime = AnimeMapper.INSTANCE.toAnime(animePostDTO);
+        System.out.println(anime);
+        return this.animeRepository.save(anime);
+    }
+
+---> Para Exceptions Checked (Aquelas que herdam de Exception) no qual devemos
+obrigatoriamente trata-las com try-catch ou delegar a responsabilidade para
+quem esta chamando com Throws na assinatura, devemos indicar no argumento
+essa Exception Checked em questão:
+
+    @Transactional(rollbackFor = BadRequestException.class)
+    public Anime save(AnimePostRequestBodyDTO animePostDTO) throws Exception { // <- Checked Exception
+        Anime anime = AnimeMapper.INSTANCE.toAnime(animePostDTO);
+
+        if(true)
+            throw new Exception("Teste"); // Forçamos o throws para teste
+
+        return this.animeRepository.save(anime);
+    }
