@@ -1071,3 +1071,106 @@ essa Exception Checked em questão:
 
         return this.animeRepository.save(anime);
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 20 - Validação de campos]: Validações padrões com uso
+de annotations.
+
+- Campos obrigatórios;
+- Campos não null;
+
+---> Adicionando dependências no projeto: pom.xml:
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+- PRIMEIRO Iremos anotar com não null o campo que vem do RequestBody nos DTOs:
+'./src/main/java/academy/devdojo/springboot2/requests/anime'
+
+    @Data
+    public class AnimePostRequestBodyDTO {
+        @NotEmpty(message = "The anime name cannot be empty!") <- AQUI
+        private String name;
+    }
+
+    @Data
+    public class AnimePutRequestBodyDTO {
+        @NotNull(message = "The anime ID cannot be NULL!") <- AQUI
+        private Long id;
+        @NotEmpty(message = "The anime name cannot be empty!") <- AQUI
+        private String name;
+    }
+
+- DEPOIS devemos flagger os parâmetros que vem do Controllador com @Valid:
+Obs: Nas duas chamadas dos DTO's anotados com as validações ditos a cima:
+                                                    AQUI
+    @PostMapping                                     \/
+    public ResponseEntity<Anime> save(@RequestBody @Valid AnimePostRequestBodyDTO animeDTO) {
+        System.out.println("\n\n\n\n"+animeDTO);
+        return new ResponseEntity<>(animeService.save(animeDTO), HttpStatus.CREATED);
+    }
+                                                      AQUI
+    @PutMapping                                        \/
+    public ResponseEntity<Void> replace(@RequestBody @Valid AnimePutRequestBodyDTO animeDTO) {
+        animeService.replace(animeDTO);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+---> Possibilidades:
+
+- @URL: Tratar URL's (Regex)
+- @Min: Tratar campos numéricos;
+- @Max: Tratar campos numéricos;
+
+---> CASO as validações detect algo de errado o Spring lança BAD REQUEST Exception, porém
+não é o handler tratado por nós que será invocado, temos que ditar essas regras também
+próxima aula será essa tarefa, retorno SEM alterar as regras de lançamento da Exception:
+
+---> RESOLUÇÃO do problema de mapeamento do MapperStruct:
+
+        @Mapping(target = "name", source = "animePostRequestBodyDTO.name")
+        public abstract Anime toAnime(AnimePostRequestBodyDTO animePostRequestBodyDTO);
+
+- Cenário: Request PUT sem nome e etc para não passar nas validações anteriores:
+
+    {
+        "timestamp": "2023-06-12T19:54:55.080+00:00",
+        "status": 400,
+        "error": "Bad Request",
+        "message": "Validation failed for object='animePostRequestBodyDTO'. Error count: 1",
+        "errors": [
+            {
+                "codes": [
+                    "NotEmpty.animePostRequestBodyDTO.name",
+                    "NotEmpty.name",
+                    "NotEmpty.java.lang.String",
+                    "NotEmpty"
+                ],
+                "arguments": [
+                    {
+                        "codes": [
+                            "animePostRequestBodyDTO.name",
+                            "name"
+                        ],
+                        "arguments": null,
+                        "defaultMessage": "name",
+                        "code": "name"
+                    }
+                ],
+                "defaultMessage": "The anime name cannot be empty!",
+                "objectName": "animePostRequestBodyDTO",
+                "field": "name",
+                "rejectedValue": "",
+                "bindingFailure": false,
+                "code": "NotEmpty"
+            }
+        ],
+        "path": "/animes"
+    }
+
+
+
+

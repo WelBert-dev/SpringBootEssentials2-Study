@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class AnimeController {
         return ResponseEntity.ok(animeService.findByName(name));
     }
     @PostMapping
-    public ResponseEntity<Anime> save(@RequestBody AnimePostRequestBodyDTO animeDTO) {
+    public ResponseEntity<Anime> save(@RequestBody @Valid AnimePostRequestBodyDTO animeDTO) {
         System.out.println("\n\n\n\n"+animeDTO);
         return new ResponseEntity<>(animeService.save(animeDTO), HttpStatus.CREATED);
     }
@@ -59,7 +60,7 @@ public class AnimeController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     @PutMapping
-    public ResponseEntity<Void> replace(@RequestBody AnimePutRequestBodyDTO animeDTO) {
+    public ResponseEntity<Void> replace(@RequestBody @Valid AnimePutRequestBodyDTO animeDTO) {
         animeService.replace(animeDTO);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

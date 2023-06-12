@@ -28,7 +28,7 @@ public class AnimeService {
     @Transactional
     public Anime save(AnimePostRequestBodyDTO animePostDTO) {
         Anime anime = AnimeMapper.INSTANCE.toAnime(animePostDTO);
-        System.out.println(anime);
+        System.out.println("\n\n\n\n\n APOS MAPPER: \n\n\n\n"+anime);
         return this.animeRepository.save(anime);
     }
     public void delete(long id) {
