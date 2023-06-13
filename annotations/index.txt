@@ -1171,6 +1171,200 @@ próxima aula será essa tarefa, retorno SEM alterar as regras de lançamento da
         "path": "/animes"
     }
 
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 21 - Handler para validação de campos]: Personalizando
+os campos retornados na resposta HTTP em casos de lançamento de Exceptions
+relacionadas as Annotations do spring-boot-starter-validation
+(Mesma lógica sobre a aula 18 - Handler Global)
+
+---> [ANTES] de personalizar, a resposta default em casos de inconcistências na
+validação:
+
+- Executando POST com "name" do body Vazio "":
+
+    {
+        "timestamp": "2023-06-13T22:06:44.636+00:00",
+        "status": 400,
+        "error": "Bad Request",
+        "message": "Validation failed for object='animePostRequestBodyDTO'. Error count: 1",
+        "errors": [
+            {
+                "codes": [
+                    "NotEmpty.animePostRequestBodyDTO.name",
+                    "NotEmpty.name",
+                    "NotEmpty.java.lang.String",
+                    "NotEmpty"
+                ],
+                "arguments": [
+                    {
+                        "codes": [
+                            "animePostRequestBodyDTO.name",
+                            "name"
+                        ],
+                        "arguments": null,
+                        "defaultMessage": "name",
+                        "code": "name"
+                    }
+                ],
+                "defaultMessage": "The anime name cannot be empty!",
+                "objectName": "animePostRequestBodyDTO",
+                "field": "name",
+                "rejectedValue": "",
+                "bindingFailure": false,
+                "code": "NotEmpty"
+            }
+        ],
+        "path": "/animes"
+    }
 
 
+---> Primeiro iremos criar uma SuperClasse que irá encapsular os fields PADRÃO,
+ou seja, Uma classe EXCEPTION genérica que será extends por outras relacionadas
+/especializadas para adição de fields se necessário: exceptions/ExceptionDetails
 
+    @Data
+    @SuperBuilder // necessario pois as subclasses utilizam @Builder, se não anotar não funcionará nelas
+    public class ExceptionDetails {
+        protected String title;
+        protected int status;
+        protected String details;
+        protected String developerMessage;
+        protected LocalDateTime timestamp;
+    }
+
+---> Depois devemos alterar a classe do pacote exceptions/httpRequest para extends dele:
+
+- [ANTES] BadRequestExceptionDetails:
+
+    @Data
+    @Builder
+    public class BadRequestExceptionDetails {
+        private String title;
+        private int status;
+        private String details;
+        private String developerMessage;
+        private LocalDateTime timestamp;
+        private String camposDoRetornoPersonalizado;
+    }
+
+- [DEPOIS] BadRequestExceptionDetails:
+
+    @Getter // <- Não precisamos gerar toda a estrutura do @Data (Getter já supri)
+    @SuperBuilder <- Precisamos trocar de @Builder para @SuperBuilder aqui TAMBÉM!
+    public class BadRequestExceptionDetails extends ExceptionDetails {
+        private String camposDoRetornoPersonalizado; // <- Deixa apenas o campo "Especializado" desta classe
+    }
+
+
+---> [CRIANDO A ESPECIALIZADA PARA VALIDATION EXCEPTION DETAILS]: Agora iremos
+definir a Especializada para este contexto (Exceptions lançadas pelas Anotações
+do spring-boot-starter-validation):
+
+- Criaremos a ValidationExceptionDetails extends ExceptionDetails no pacote
+exceptions:
+
+    @Getter
+    @SuperBuilder
+    public class ValidationExceptionDetails extends ExceptionDetails {
+        private final String fields;
+        private final String fieldsMessage;
+    }
+
+---> [DEPOIS] iremos interceptar as ações do Controller com uso do Handler
+que irá tratar a exception, neste caso, retornar os campos definidos em Details
+para as chamadas HTTP inválidas para as annotations do spring-boot-starter-validation:
+
+- [PRIMEIRO] passo é identificar qual é a Exception lançada pelas annotations do
+validador utilizado (spring-boot-starter-validation), para indicarmos ao Spring
+que toda vez que lançado ela, ele deverá utilizar o handler definido por nós:
+
+    - Para saber qual é a Exception lançada, podemos utilizar o parâmetro na URL:
+    http://localhost:8080/animes?trace=true
+
+    - OBS: Lembrando que para esse parâmetro funcionar devemos settar a configuração
+    no arquivo /resources/application.yml:
+
+        server:
+          error:
+            include-stacktrace: on_trace_param
+
+    - [RESPONSE] Do JSON:
+
+    {
+        "timestamp": "2023-06-13T22:34:46.019+00:00",
+        "status": 400,
+        "error": "Bad Request",
+        "trace": "org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [0] in public org.springframework.http.ResponseEntity<academy.devdojo.springboot2.domain.Anime> academy.devdojo.springboot2.controller.AnimeController.save(academy.devdojo.springboot2.requests.anime.AnimePostRequestBodyDTO): [Field error in object 'animePostRequestBodyDTO' on field 'name': rejected value []; codes [NotEmpty.animePostRequestBodyDTO.name,NotEmpty.name,NotEmpty.java.lang.String,NotEmpty]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [animePostRequestBodyDTO.name,name]; arguments []; default message [name]]; default message [The anime name cannot be empty!]] \n\tat org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.resolveArgument(RequestResponseBodyMethodProcessor.java:139)\n\tat org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:121)\n\tat org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:170)\n\tat org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:137)\n\tat org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:106)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:893)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:807)\n\tat org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)\n\tat org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1061)\n\tat org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:961)\n\tat org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)\n\tat org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:652)\n\tat org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:733)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:231)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:202)\n\tat org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:97)\n\tat org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:542)\n\tat org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:143)\n\tat org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:92)\n\tat org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:78)\n\tat org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:343)\n\tat org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:374)\n\tat org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:65)\n\tat org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:868)\n\tat org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1590)\n\tat org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)\n\tat org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)\n\tat java.base/java.lang.Thread.run(Thread.java:833)\n",
+        "message": "Validation failed for object='animePostRequestBodyDTO'. Error count: 1",
+        "errors": [
+            {
+                "codes": [
+                    "NotEmpty.animePostRequestBodyDTO.name",
+                    "NotEmpty.name",
+                    "NotEmpty.java.lang.String",
+                    "NotEmpty"
+                ],
+                "arguments": [
+                    {
+                        "codes": [
+                            "animePostRequestBodyDTO.name",
+                            "name"
+                        ],
+                        "arguments": null,
+                        "defaultMessage": "name",
+                        "code": "name"
+                    }
+                ],
+                "defaultMessage": "The anime name cannot be empty!",
+                "objectName": "animePostRequestBodyDTO",
+                "field": "name",
+                "rejectedValue": "",
+                "bindingFailure": false,
+                "code": "NotEmpty"
+            }
+        ],
+        "path": "/animes"
+    }
+
+    - PODEMOS NOTAR A EXCEPTION LANÇADA EM:
+        "trace": "org.springframework.web.bind.MethodArgumentNotValidException..."
+
+
+- [IMPLEMENTAÇÃO do Handler em sí]:
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationExceptionDetails> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException exception) {
+        log.info("Fields {}", exception.getBindingResult().getFieldError().getField());
+
+        List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
+
+        String fields_str = fieldErrors.stream().map(FieldError::getField).collect(Collectors.joining(", "));
+        String fieldsMessage_str = fieldErrors.stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(", "));
+
+        return new ResponseEntity<>(
+                ValidationExceptionDetails.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .title("Bad Request Exception, Invalid Fields!")
+                        .details("Check the field(s) error")
+                        .developerMessage(exception.getClass().getName())
+
+                        .fields(fields_str) // Aqui estão os Fields personalizados/especializados
+                        .fieldsMessage(fieldsMessage_str).build()
+                , HttpStatus.BAD_REQUEST
+        );
+    }
+
+
+---> [FINALMENTE RESPONSE JSON PERSONALIZADO]:
+
+    {
+        "title": "Bad Request Exception, Invalid Fields!",
+        "status": 400,
+        "details": "Check the field(s) error",
+        "developerMessage": "org.springframework.web.bind.MethodArgumentNotValidException",
+        "timestamp": "2023-06-13T19:52:57.881155637",
+        "fields": "name",
+        "fieldsMessage": "The anime name cannot be empty!"
+    }
