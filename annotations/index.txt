@@ -1368,3 +1368,242 @@ que toda vez que lançado ela, ele deverá utilizar o handler definido por nós:
         "fields": "name",
         "fieldsMessage": "The anime name cannot be empty!"
     }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 22 - Sobrescrevendo handler do Spring]: O Spring já
+trata (Handler) muitas Exceptions por nós, é possível então sobrescrever esses
+tratamentos e personaliza-los, como por exemplo o MethodArgumentNotValidException
+já existe handler do Spring que faz o tratamento dessa Exception.
+
+- Para saber se uma Exception já possui algum Handler que intercepta e trata
+por meio dos Resolvers, podemos verificar no Log. Para lançar Exception e
+simular fiz uma requisição com Json INVÀLIDO, pois para esse cenário já existe
+Handlers e Resolvers prontos:
+
+    2023-06-14 15:52:21.019  WARN 8292 --- [nio-8080-exec-1]
+    .w.s.m.s.DefaultHandlerExceptionResolver :
+    Resolved [org.springframework.http.converter.HttpMessageNotReadableException:
+    JSON parse error: Unexpected character ('"' (code 34)):
+    was expecting a colon to separate field name and value;
+    nested exception is com.fasterxml.jackson.core.JsonParseException:
+    Unexpected character ('"' (code 34)): was expecting a colon to separate field name and value
+     at [Source: (PushbackInputStream); line: 2, column: 14]]
+
+     - Body do Response no POSTMAN: (http://localhost:8080/animes?trace=true)
+
+     {
+         "timestamp": "2023-06-14T18:52:21.050+00:00",
+         "status": 400,
+         "error": "Bad Request",
+         "trace": "org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value\n at [Source: (PushbackInputStream); line: 2, column: 14]\n\tat org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.readJavaType(AbstractJackson2HttpMessageConverter.java:285)\n\tat org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.read(AbstractJackson2HttpMessageConverter.java:243)\n\tat org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver.readWithMessageConverters(AbstractMessageConverterMethodArgumentResolver.java:205)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.readWithMessageConverters(RequestResponseBodyMethodProcessor.java:158)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.resolveArgument(RequestResponseBodyMethodProcessor.java:131)\n\tat org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:121)\n\tat org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:170)\n\tat org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:137)\n\tat org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:106)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:893)\n\tat org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:807)\n\tat org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)\n\tat org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1061)\n\tat org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:961)\n\tat org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)\n\tat org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:652)\n\tat org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:733)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:231)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)\n\tat org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)\n\tat org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)\n\tat org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)\n\tat org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:202)\n\tat org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:97)\n\tat org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:542)\n\tat org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:143)\n\tat org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:92)\n\tat org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:78)\n\tat org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:343)\n\tat org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:374)\n\tat org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:65)\n\tat org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:868)\n\tat org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1590)\n\tat org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)\n\tat org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)\n\tat java.base/java.lang.Thread.run(Thread.java:833)\nCaused by: com.fasterxml.jackson.core.JsonParseException: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value\n at [Source: (PushbackInputStream); line: 2, column: 14]\n\tat com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:1851)\n\tat com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:707)\n\tat com.fasterxml.jackson.core.base.ParserMinimalBase._reportUnexpectedChar(ParserMinimalBase.java:632)\n\tat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._skipColon2(UTF8StreamJsonParser.java:3138)\n\tat com.fasterxml.jackson.core.json.UTF8StreamJsonParser._skipColon(UTF8StreamJsonParser.java:3067)\n\tat com.fasterxml.jackson.core.json.UTF8StreamJsonParser.nextToken(UTF8StreamJsonParser.java:765)\n\tat com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:160)\n\tat com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4526)\n\tat com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3521)\n\tat org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.readJavaType(AbstractJackson2HttpMessageConverter.java:274)\n\t... 51 more\n",
+         "message": "JSON parse error: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value\n at [Source: (PushbackInputStream); line: 2, column: 14]",
+         "path": "/animes"
+     }
+
+---> Primeiro passo para sobrescrever esses Handlers do Spring é Extends na classe
+RestExceptionHandler extends ResponseEntityExceptionHandler
+
+- Para saber como o Spring faz o tratamento, basta CTRL + Click no ResponseEntityExceptionHandler
+e lá temos tratamento para essas Exceptions:
+
+    @ExceptionHandler({
+    			HttpRequestMethodNotSupportedException.class,
+    			HttpMediaTypeNotSupportedException.class,
+    			HttpMediaTypeNotAcceptableException.class,
+    			MissingPathVariableException.class,
+    			MissingServletRequestParameterException.class,
+    			ServletRequestBindingException.class,
+    			ConversionNotSupportedException.class,
+    			TypeMismatchException.class,
+    			HttpMessageNotReadableException.class,
+    			HttpMessageNotWritableException.class,
+    			MethodArgumentNotValidException.class,   <--- Essa nós fizemos handler na aula anterior
+    			MissingServletRequestPartException.class,
+    			BindException.class,
+    			NoHandlerFoundException.class,
+    			AsyncRequestTimeoutException.class
+    		})
+
+- Ctrl + F em "MethodArgumentNotValidException":
+
+    ...
+    else if (ex instanceof MethodArgumentNotValidException) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return handleMethodArgumentNotValid((MethodArgumentNotValidException) ex, headers, status, request);
+    }
+
+- Ctrl + Click no retorno: "handleMethodArgumentNotValid((MethodArgumentNotValidException...":
+
+    ...
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+        return handleExceptionInternal(ex, null, headers, status, request);
+    }
+
+- Ctrl + Click no retorno Novamente "handleExceptionInternal(ex...":
+
+    ...
+    protected ResponseEntity<Object> handleExceptionInternal(
+    			Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+        if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
+            request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        }
+        return new ResponseEntity<>(body, headers, status);
+    }
+
+---> Iremos copiar essa assinatura e Sobrescrever ela em `handler/exceptions/
+httpRequest/RestExceptionHandler.java` que agora Extends de `org/springframework/
+web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.java`,
+adicionando no retorno os campos personalizados definidos na classe Details genérica
+da aula anterior em `exceptions/ExceptionDetails.java`:
+
+- Sobrescrevendo o método `protected ResponseEntity<Object> handleExceptionInternal`:
+na classe `handler/exceptions/httpRequest/RestExceptionHandler.java` e retornar
+o ExceptionDetails genérico definido na aula anterior:
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+        ExceptionDetails exceptionDetails = ExceptionDetails.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .title(ex.getCause().getMessage())
+                .details(ex.getMessage())
+                .developerMessage(ex.getClass().getName()).build();
+
+        return new ResponseEntity<>(exceptionDetails, headers, status);
+    }
+
+- [DUVIDA]: QUANDO o Spring chama esse handle? Não foi explicado no vídeo!
+- [DUVIDA TIRADA!!]: Esse método é polimorfico e é chamado para TODAS
+as Exceptions lançadas e tratadas nesta classe `ResponseEntityExceptionHandler`
+pois a estrutura do retorno para todas é o mesmo, mudando apenas os valores
+dos campos, porisso foi extraído um método unico para todas, já que
+o código se repetiria em todos os tratamentos, mudando apenas os valores,
+então basta parâmetrizar esses campos e passa-los na chamada, agora que
+sobrescrevemos, TODAS essas Exceptions tratadas na classe `ResponseEntityExceptionHandler`
+VÃO Passar a chamar esse método que definimos, então o retorno será genérico
+para todas elas.
+
+- Executando o mesmo cenário do começo da aula que gerou o JSON INVÀLIDO,
+porém agora a resposta do Body é diferente pois sobrescrevemos o
+`handleExceptionInternal`: (http://localhost:8080/animes?trace=true)
+
+    {
+        "title": "Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value\n at [Source: (PushbackInputStream); line: 2, column: 14]",
+        "status": 400,
+        "details": "JSON parse error: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character ('\"' (code 34)): was expecting a colon to separate field name and value\n at [Source: (PushbackInputStream); line: 2, column: 14]",
+        "developerMessage": "org.springframework.http.converter.HttpMessageNotReadableException",
+        "timestamp": "2023-06-14T17:17:35.875973742"
+    }
+
+
+---> Sobrescrevendo o handler do proprio Spring que ja faz tratamento para
+MethodArgumentNotValidException que definimos na aula anterior:
+
+- [ANTES] O Handler criado por nós em RestExceptionHandler:
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationExceptionDetails> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException exception) {
+        log.info("Fields {}", exception.getBindingResult().getFieldError().getField());
+
+        List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
+
+        String fields_str = fieldErrors.stream().map(FieldError::getField).collect(Collectors.joining(", "));
+        String fieldsMessage_str = fieldErrors.stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(", "));
+
+        return new ResponseEntity<>(
+                ValidationExceptionDetails.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .title("Bad Request Exception, Invalid Fields!")
+                        .details("Check the field(s) error")
+                        .developerMessage(exception.getClass().getName())
+                        .fields(fields_str)
+                        .fieldsMessage(fieldsMessage_str).build()
+                , HttpStatus.BAD_REQUEST
+        );
+    }
+
+- Para identificar o método que vamos sobrescrever, vamos fazer os mesmos passos:
+
+- CTRL + Click no ResponseEntityExceptionHandler;
+
+- CTRL + Click no retorno: "handleMethodArgumentNotValid((MethodArgumentNotValidException...":
+
+    ...
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+        return handleExceptionInternal(ex, null, headers, status, request);
+    }
+
+- Pronto, basta copiar a assinatura e ao invéz de retornar o handleExceptionInternal
+que é genérico/polimorfico para tratar todas as instâncias de exceptions lançadas
+pelo Spring MVC, verificando com if's qual instância é por meio do `instance of` e
+passando para esse método os valores corretos para cada tipo de Exception:
+
+    @ExceptionHandler({
+    			HttpRequestMethodNotSupportedException.class,
+    			HttpMediaTypeNotSupportedException.class,
+    			HttpMediaTypeNotAcceptableException.class,
+    			MissingPathVariableException.class,
+    			MissingServletRequestParameterException.class,
+    			ServletRequestBindingException.class,
+    			ConversionNotSupportedException.class,
+    			TypeMismatchException.class,
+    			HttpMessageNotReadableException.class,
+    			HttpMessageNotWritableException.class,
+    			MethodArgumentNotValidException.class,
+    			MissingServletRequestPartException.class,
+    			BindException.class,
+    			NoHandlerFoundException.class,
+    			AsyncRequestTimeoutException.class
+    		})
+
+- [DEPOIS] Vamos deixar o método tôdo igual, mudando apenas a assinatura, e
+alterando o argumento de `exception` para `ex` que vem na nova assinatura:
+
+     protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.info("Fields {}", ex.getBindingResult().getFieldError().getField());
+
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+
+        String fields_str = fieldErrors.stream().map(FieldError::getField).collect(Collectors.joining(", "));
+        String fieldsMessage_str = fieldErrors.stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(", "));
+
+        return new ResponseEntity<>(
+                ValidationExceptionDetails.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .title("Bad Request Exception, Invalid Fields!")
+                        .details("Check the field(s) error")
+                        .developerMessage(ex.getClass().getName())
+                        .fields(fields_str)
+                        .fieldsMessage(fieldsMessage_str).build()
+                , HttpStatus.BAD_REQUEST
+        );
+    }
+
+- Executando POST com "name" do body Vazio "": (Mesmo cenário da aula anteior)
+para verificar o MESMO método que é executado, no caso esse que sobrescrevemos
+do handler do Spring MVC: (http://localhost:8080/animes?trace=true)
+
+    {
+        "title": "Bad Request Exception, Invalid Fields!",
+        "status": 400,
+        "details": "Check the field(s) error",
+        "developerMessage": "org.springframework.web.bind.MethodArgumentNotValidException",
+        "timestamp": "2023-06-14T17:19:24.900122155",
+        "fields": "name",
+        "fieldsMessage": "The anime name cannot be empty!"
+    }
+
+- O Retorno é o MESMO, porém agora a lógica é diferente pois sobrescrevemos o
+handler do Spring MVC! podemos fazer isso para todos e assim padronizar o
+tratamento das Exceptions para maior coesão do aplicativo.
