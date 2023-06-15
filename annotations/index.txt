@@ -1607,3 +1607,367 @@ do handler do Spring MVC: (http://localhost:8080/animes?trace=true)
 - O Retorno é o MESMO, porém agora a lógica é diferente pois sobrescrevemos o
 handler do Spring MVC! podemos fazer isso para todos e assim padronizar o
 tratamento das Exceptions para maior coesão do aplicativo.
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 23 - Paginação]: Annotations que resolvem esse problema,
+quando temos muitos registros no retorno o ideal é retornar fragmentado..
+é bem simples, basta fazer pequenas alterações e já temos esses endpoints paginados.
+- O proprio JPA no Repository já tem essa funcionalidade implementada!
+
+---> Primeira alteração é ao invés de retornar ResponseEntity<List<Anime>> alterar
+para ResponseEntity<Page<Anime>> no Controller do Endpoint em questão:
+
+- [ANTES] Retornando List ao realizar GET em localhost:8080/animes (listAll):
+
+    @GetMapping
+    public ResponseEntity<List<Anime>> list() {
+        ...
+
+        return new ResponseEntity<>(animeService.listAll(), HttpStatus.OK);
+    }
+
+- [DEPOIS] Retornando paginado, alterando o código anterior:
+
+[src/main/java/academy/devdojo/springboot2/controller/AnimeController.java]:
+
+    import org.springframework.data.domain.Page;
+    import org.springframework.data.domain.Pageable;
+
+                          AQUI                AQUI
+    @GetMapping            \/                  \/
+    public ResponseEntity<Page<Anime>> list(Pageable pageble) {
+        ...                                               AQUI
+                                                           \/
+        return new ResponseEntity<>(animeService.listAll(pageble), HttpStatus.OK);
+    }
+
+    - Como estamos passando o pageble para o `animeService.listAll(pageble)`, logo,
+    devemos também alterar para receber o argumento no Service.
+    Obs: Não precisa alterar nada no Repository pois o método `listAll()` paginado vem
+    do Fluxo de herança do Spring Data JPA que estendemos no Repository, logo, não
+    precisamos alterar nada nele. (Mais informações abaixo).
+
+[src/main/java/academy/devdojo/springboot2/service/AnimeService.java]:
+
+           AQUI
+            \/
+    public Page<Anime> listAll(Pageable pageable) {
+        ...                                  AQUI
+                                              \/
+        return this.animeRepository.findAll(pageable);
+    }
+
+- Pronto, só de realizar essas alterações já temos um Endpoint paginado!
+
+- Isso é possível pois o método `findAll()` do Spring Data JPA vem da interface
+`PagingAndSortingRepository<T, ID>` que implementa a paginação, esse metodo
+vem do fluxo de herança:
+AnimeRepository extends JpaRepository<Anime, Long>;
+JpaRepository<Anime, Long> extends PagingAndSortingRepository<T, ID>, QueryByExampleExecutor<T>;
+
+- Para verificar isso, basta CTRL + Click no método `this.animeRepository.findAll(pageable);`
+do AnimeService anterior:
+
+[org/springframework/data/repository/PagingAndSortingRepository.class]:
+
+    @NoRepositoryBean
+    public interface PagingAndSortingRepository<T, ID> extends CrudRepository<T, ID> {
+        Iterable<T> findAll(Sort var1);
+
+        Page<T> findAll(Pageable var1);
+    }
+
+---> [RESPONSE DO JSON ANTES DAS ALTERAÇÔES]:
+
+    [
+        {
+            "id": 8,
+            "name": "Naruto MAPPER"
+        },
+        {
+            "id": 9,
+            "name": "Naruto MAPPER UPDATER"
+        },
+        {
+            "id": 10,
+            "name": "Naruto MAPPER UPDATER 6"
+        },
+        {
+            "id": 12,
+            "name": "Naruto MAPPER UPDATER 12"
+        },
+        {
+            "id": 13,
+            "name": "pipokinha"
+        },
+        {
+            "id": 14,
+            "name": null
+        },
+        {
+            "id": 15,
+            "name": null
+        },
+        {
+            "id": 16,
+            "name": null
+        },
+        {
+            "id": 17,
+            "name": null
+        },
+        {
+            "id": 18,
+            "name": null
+        },
+        {
+            "id": 19,
+            "name": "Pirikita"
+        },
+        {
+            "id": 20,
+            "name": null
+        },
+        {
+            "id": 21,
+            "name": null
+        },
+        {
+            "id": 22,
+            "name": "Postoide"
+        },
+        {
+            "id": 23,
+            "name": "Postoide UPDATE"
+        },
+        {
+            "id": 24,
+            "name": " "
+        }
+    ]
+
+---> [RESPONSE DO JSON DEPOIS DAS ALTERAÇÔES]:
+
+    {
+        "content": [
+            {
+                "id": 8,
+                "name": "Naruto MAPPER"
+            },
+            {
+                "id": 9,
+                "name": "Naruto MAPPER UPDATER"
+            },
+            {
+                "id": 10,
+                "name": "Naruto MAPPER UPDATER 6"
+            },
+            {
+                "id": 12,
+                "name": "Naruto MAPPER UPDATER 12"
+            },
+            {
+                "id": 13,
+                "name": "pipokinha"
+            },
+            {
+                "id": 14,
+                "name": null
+            },
+            {
+                "id": 15,
+                "name": null
+            },
+            {
+                "id": 16,
+                "name": null
+            },
+            {
+                "id": 17,
+                "name": null
+            },
+            {
+                "id": 18,
+                "name": null
+            },
+            {
+                "id": 19,
+                "name": "Pirikita"
+            },
+            {
+                "id": 20,
+                "name": null
+            },
+            {
+                "id": 21,
+                "name": null
+            },
+            {
+                "id": 22,
+                "name": "Postoide"
+            },
+            {
+                "id": 23,
+                "name": "Postoide UPDATE"
+            },
+            {
+                "id": 24,
+                "name": " "
+            }
+        ],
+        "pageable": {
+            "sort": {
+                "sorted": false,
+                "unsorted": true,
+                "empty": true
+            },
+            "offset": 0,
+            "pageNumber": 0,
+            "pageSize": 20,
+            "paged": true,
+            "unpaged": false
+        },
+        "totalPages": 1,
+        "totalElements": 16,
+        "last": true,
+        "size": 20,
+        "number": 0,
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "first": true,
+        "numberOfElements": 16,
+        "empty": false
+    }
+
+- Por padrão podemos notar as seguintes informações neste JSON:
+
+    - content é a chave da lista em questão.
+    - Número máximo de elementos por página: 20 (pageable.pageSize);
+    - Número total de páginas: 1 (totalPages), ou seja, apenas esse Json;
+    - Número total de elementos que foi retornado: 16 (totalElements);
+    - Flag que indica se é a última página: true (last);
+    - Flag que indica se é a primeira página: true (first);
+    ...
+
+---> Personalizando o Response JSON da paginação deste Endpoint pelas chamadas no Frontend:
+
+- Para indicar a quantidade de registros que deseja, podemos utilizar a seguinte URL:
+
+    http://localhost:8080/animes?size=5 (ou http://localhost:8080/animes?size=5&page=0)
+
+    {
+        "content": [
+            {
+                "id": 8,
+                "name": "Naruto MAPPER"
+            },
+            {
+                "id": 9,
+                "name": "Naruto MAPPER UPDATER"
+            },
+            {
+                "id": 10,
+                "name": "Naruto MAPPER UPDATER 6"
+            },
+            {
+                "id": 12,
+                "name": "Naruto MAPPER UPDATER 12"
+            },
+            {
+                "id": 13,
+                "name": "pipokinha"
+            }
+        ],
+        "pageable": {
+            "sort": {
+                "sorted": false,
+                "unsorted": true,
+                "empty": true
+            },
+            "offset": 0,
+            "pageNumber": 0,
+            "pageSize": 5,
+            "paged": true,
+            "unpaged": false
+        },
+        "totalPages": 4,
+        "totalElements": 16,
+        "last": false,
+        "size": 5,
+        "number": 0,
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "first": true,
+        "numberOfElements": 5,
+        "empty": false
+    }
+
+    - Podemos notar que agora as informações são:
+
+        - Em pageable.pageSize é indicado qual o size da página atual (5);
+        - Em totalPages é indicado a quantidade de páginas (4) geradas para
+        encapsular os 16 registros;
+        - Em totalElements é indicado a quantidade TOTAL de registros (16)
+        somados nas 4 páginas geradas;
+        - Agora last aponta para false, pois ainda temos +3 páginas para iterar;
+
+- Para NAVEGAR na próxima página gerada, utilizamos o seguinte parâmetro na chamada
+do Frontend: (Lembrando que a contagem começa do 0)
+
+    http://localhost:8080/animes?size=5&page=1
+
+    {
+        "content": [
+            {
+                "id": 14,
+                "name": null (NÃO é erro, os registros são null mesmo)
+            },
+            {
+                "id": 15,
+                "name": null
+            },
+            {
+                "id": 16,
+                "name": null
+            },
+            {
+                "id": 17,
+                "name": null
+            },
+            {
+                "id": 18,
+                "name": null
+            }
+        ],
+        "pageable": {
+            "sort": {
+                "sorted": false,
+                "unsorted": true,
+                "empty": true
+            },
+            "offset": 5,
+            "pageNumber": 1,
+            "pageSize": 5,
+            "paged": true,
+            "unpaged": false
+        },
+        "totalPages": 4,
+        "totalElements": 16,
+        "last": false,
+        "size": 5,
+        "number": 1,
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "first": false,
+        "numberOfElements": 5,
+        "empty": false
+    }
