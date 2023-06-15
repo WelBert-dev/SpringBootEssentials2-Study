@@ -1856,7 +1856,8 @@ do AnimeService anterior:
 
 - Para indicar a quantidade de registros que deseja, podemos utilizar a seguinte URL:
 
-    http://localhost:8080/animes?size=5 (ou http://localhost:8080/animes?size=5&page=0)
+    GET http://localhost:8080/animes?size=5 (ou http://localhost:8080/animes?size=5&page=0)
+    (Body NONE)
 
     {
         "content": [
@@ -1920,7 +1921,7 @@ do AnimeService anterior:
 - Para NAVEGAR na próxima página gerada, utilizamos o seguinte parâmetro na chamada
 do Frontend: (Lembrando que a contagem começa do 0)
 
-    http://localhost:8080/animes?size=5&page=1
+    GET http://localhost:8080/animes?size=5&page=1 (Body NONE)
 
     {
         "content": [
@@ -1968,6 +1969,266 @@ do Frontend: (Lembrando que a contagem começa do 0)
             "empty": true
         },
         "first": false,
+        "numberOfElements": 5,
+        "empty": false
+    }
+
+-------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 24 - WebMvcConfigurer]: Configurando o retorno JSON
+anterior (Também é possível realizar outras configurações, mais detalhes sobre
+as possibilidades de configurações callback do Spring MVC no src de estudos:
+`src/main/java/academy/devdojo/springboot2/configurer/DevDojoWebMvcConfigurer.java`
+
+---> Primeiro iremos criar o pacote que irá centralizar configurações em geral:
+`academy/devdojo/springboot2/configurer` e nelçe iremos criar a classe
+`DevDojoWebMvcConfigurer.java` que irá implementar a interface `WebMvcConfigurer`
+
+[src/main/java/academy/devdojo/springboot2/configurer/DevDojoWebMvcConfigurer.java]:
+
+    @Configuration
+    public class DevDojoWebMvcConfigurer implements WebMvcConfigurer {
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+
+            PageableHandlerMethodArgumentResolver pageHandler = new PageableHandlerMethodArgumentResolver();
+
+   Número da página primeira página
+   que retornará se não passar nada na chamada do frontend ↘   ↙ Size de registros retornados por página
+                                                           \/ \/
+            pageHandler.setFallbackPageable(PageRequest.of(1, 5));
+
+            resolvers.add(pageHandler);
+           // WebMvcConfigurer.super.addArgumentResolvers(resolvers);
+        }
+    }
+
+
+---> [RESPONSE DO JSON ANTES DAS ALTERAÇÕES]:
+
+    http://localhost:8080/animes
+
+    {
+        "content": [
+            {
+                "id": 8,
+                "name": "Naruto MAPPER"
+            },
+            {
+                "id": 9,
+                "name": "Naruto MAPPER UPDATER"
+            },
+            {
+                "id": 10,
+                "name": "Naruto MAPPER UPDATER 6"
+            },
+            {
+                "id": 12,
+                "name": "Naruto MAPPER UPDATER 12"
+            },
+            {
+                "id": 13,
+                "name": "pipokinha"
+            },
+            {
+                "id": 14,
+                "name": null
+            },
+            {
+                "id": 15,
+                "name": null
+            },
+            {
+                "id": 16,
+                "name": null
+            },
+            {
+                "id": 17,
+                "name": null
+            },
+            {
+                "id": 18,
+                "name": null
+            },
+            {
+                "id": 19,
+                "name": "Pirikita"
+            },
+            {
+                "id": 20,
+                "name": null
+            },
+            {
+                "id": 21,
+                "name": null
+            },
+            {
+                "id": 22,
+                "name": "Postoide"
+            },
+            {
+                "id": 23,
+                "name": "Postoide UPDATE"
+            },
+            {
+                "id": 24,
+                "name": " "
+            }
+        ],
+        "pageable": {
+            "sort": {
+                "sorted": false,
+                "unsorted": true,
+                "empty": true
+            },
+            "offset": 0,
+            "pageNumber": 0,
+            "pageSize": 20,
+            "paged": true,
+            "unpaged": false
+        },
+        "totalPages": 1,
+        "totalElements": 16,
+        "last": true,
+        "size": 20,
+        "number": 0,
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "first": true,
+        "numberOfElements": 16,
+        "empty": false
+    }
+
+---> [RESPONSE DO JSON DEPOIS DAS ALTERAÇÕES]:
+
+    http://localhost:8080/animes (OBS: Mesma requisição anterior, ou seja, sem size=5&page=0)
+
+    {
+        "content": [
+            {
+                "id": 14,
+                "name": null
+            },
+            {
+                "id": 15,
+                "name": null
+            },
+            {
+                "id": 16,
+                "name": null
+            },
+            {
+                "id": 17,
+                "name": null
+            },
+            {
+                "id": 18,
+                "name": null
+            }
+        ],
+        "pageable": {
+            "sort": {
+                "sorted": false,
+                "unsorted": true,
+                "empty": true
+            },
+            "offset": 5,
+            "pageNumber": 1,
+            "pageSize": 5,
+            "paged": true,
+            "unpaged": false
+        },
+        "totalPages": 4,
+        "totalElements": 16,
+        "last": false,
+        "size": 5,
+        "number": 1,
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "first": false,
+        "numberOfElements": 5,
+        "empty": false
+    }
+
+- Esse response é apenas a nível de demonstração, pois não vamos deixar como
+padrão retornar a página do index 1 e sim a primeira página do index 0!!
+Logo, a implementação final da classe tal será:
+
+    @Configuration
+    public class DevDojoWebMvcConfigurer implements WebMvcConfigurer {
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+
+            PageableHandlerMethodArgumentResolver pageHandler = new PageableHandlerMethodArgumentResolver();
+            pageHandler.setFallbackPageable(PageRequest.of(0, 5));
+
+            resolvers.add(pageHandler);
+           // WebMvcConfigurer.super.addArgumentResolvers(resolvers);
+        }
+    }
+
+    - Ou seja, A página inicial default que será retornada se não passar nada na
+    chamada do Frontend será a primeira página (0) e o size será 5
+    (O padrão do Spring MVC antes das personalizações era 20);
+    pois a nível de demonstração anterior a primeira página retornada se não
+    passar nada na URL é o equivalente ao `size=5&page=1`;
+
+
+---> [OU SEJA, O RESPONSE JSON FINAL SERÁ] O Equivalente ao parâmetro `?size=5&page=0`:
+
+    GET http://localhost:8080/animes (Body NONE)
+
+    {
+        "content": [
+            {
+                "id": 8,
+                "name": "Naruto MAPPER"
+            },
+            {
+                "id": 9,
+                "name": "Naruto MAPPER UPDATER"
+            },
+            {
+                "id": 10,
+                "name": "Naruto MAPPER UPDATER 6"
+            },
+            {
+                "id": 12,
+                "name": "Naruto MAPPER UPDATER 12"
+            },
+            {
+                "id": 13,
+                "name": "pipokinha"
+            }
+        ],
+        "pageable": {
+            "sort": {
+                "sorted": false,
+                "unsorted": true,
+                "empty": true
+            },
+            "offset": 0,
+            "pageNumber": 0,
+            "pageSize": 5,
+            "paged": true,
+            "unpaged": false
+        },
+        "totalPages": 4,
+        "totalElements": 16,
+        "last": false,
+        "size": 5,
+        "number": 0,
+        "sort": {
+            "sorted": false,
+            "unsorted": true,
+            "empty": true
+        },
+        "first": true,
         "numberOfElements": 5,
         "empty": false
     }
