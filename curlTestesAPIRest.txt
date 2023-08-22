@@ -1,0 +1,176 @@
+
+
+Comandos curl para testar requisições API
+Dicas - 30/Ago/2020 - por André Kanamura
+facebook-white sharing button
+twitter-white sharing button
+linkedin-white sharing button
+email-white sharing button
+sharethis-white sharing button
+
+O curl é uma ferramenta de linha de comando que permite lidar com transferência de dados por meio de diferentes tipos de protocolos, como HTTP, HTTPS, FTP, POP3, entre muitos outros. Por isso, o curl é uma boa forma de verificar chamadas e respostas de RESTful APIs que não dependem de linguagem de programação. Vamos mostrar brevemente alguns comandos curl que podem ser úteis para esse trabalho.
+
+A estrutura de um comando curl consiste em:
+
+$ curl [OPÇÕES] [URL]
+
+O curl possui dezenas de opções, mas as mais comuns para lidar com APIs são:
+Opção 	Descrição
+-i, --include 	Mostra o header da resposta no output
+-d, --data 	Dados a serem enviados no POST
+-H, --header 	Envia o header da requisição
+-X, --request 	Especifica o método HTTP a ser usado na requisição
+HTTP GET
+
+Vamos usar o JsonPlaceholder para nossos exemplos.
+
+O padrão do comando curl é executar um GET na URL especificada, então o comando poderia ficar assim:
+
+$ curl https://jsonplaceholder.typicode.com/todos
+
+Você pode utilizar a opção -i para incluir o header no output.
+HTTP POST
+
+Para enviarmos dados em um POST, podemos usar a opção -d.
+
+$ curl -d "userId=1&title=titulo da tarefa&completed=false" https://jsonplaceholder.typicode.com/todos
+
+Usando essa opção, o curl automaticamente assume que queremos usar o método POST. O comando acima é efetivamente o mesmo que o seguinte:
+
+$ curl -X POST -d "userId=1&title=titulo da tarefa&completed=false" https://jsonplaceholder.typicode.com/todos
+
+É possível que você precise personalizar o header da requisição se quiser, por exemplo, enviar dados em formato json. Neste caso, pode utilizar a opção -H para fazer isso:
+
+$ curl -d '{"userId": 1, "title": "titulo da tarefa", "completed": false}' -H 'Content-Type: application/json' https://jsonplaceholder.typicode.com/todos
+
+HTTP PUT
+
+Para atualizar ou substituir dados existentes no servidor, podemos usar o comando PUT. Ele é semelhante ao POST, mas precisamos especificar o método PUT com a opção -X e passar na URL o id do dado que vamos alterar, neste caso, a tarefa de id = 5:
+
+$ curl -X PUT -d "userId=1&title=titulo da tarefa&completed=true" https://jsonplaceholder.typicode.com/todos/5
+
+HTTP DELETE
+
+Para remover algum dado do servidor, podemos usar o comando DELETE, novamente utilizando a opção -X e o id do dado que será apagado na URL:
+
+$ curl -X DELETE https://jsonplaceholder.typicode.com/todos/5
+
+Conclusão
+
+Esse foi um breve resumo de algumas das formas que podemos utilizar o comando curl para trabalhar com requisições Web. Se quiser saber mais, recomendamos consultar a documentação oficial ou rodar o comando man curl no seu terminal para acessar o manual.
+
+-----------------------------------------------------------------------
+
+
+TESTES:
+
+1o - Base de dados vazia:
+$ curl -i http://localhost:8080/animes
+
+HTTP/1.1 200
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Tue, 22 Aug 2023 17:31:25 GMT
+
+{
+   "content":[
+
+   ],
+   "pageable":{
+      "sort":{
+         "sorted":false,
+         "unsorted":true,
+         "empty":true
+      },
+      "pageNumber":0,
+      "pageSize":5,
+      "offset":0,
+      "paged":true,
+      "unpaged":false
+   },
+   "totalPages":0,
+   "totalElements":0,
+   "last":true,
+   "first":true,
+   "sort":{
+      "sorted":false,
+      "unsorted":true,
+      "empty":true
+   },
+   "number":0,
+   "numberOfElements":0,
+   "size":5,
+   "empty":true
+}
+
+-----------------------------------------------------------------------
+
+2o - Alimentando base de dados:
+$ curl -i -d '{"name":"Dragon Ball Z"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Tokyo Ghoul"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Death Note"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Fullmetal Alchemist BH"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Hellsing"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Yuyu Hakusho"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+
+
+-----------------------------------------------------------------------
+
+3o - Realizando GET sem id para executar o getAll() paginado:
+$ curl -i http://localhost:8080/animes
+
+HTTP/1.1 200
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Tue, 22 Aug 2023 18:00:13 GMT
+
+{
+   "content":[
+      {
+         "id":1,
+         "name":null
+      },
+      {
+         "id":2,
+         "name":null
+      },
+      {
+         "id":3,
+         "name":"Dragon Ball Z"
+      },
+      {
+         "id":4,
+         "name":"Tokyo Ghoul"
+      },
+      {
+         "id":5,
+         "name":"Death Note"
+      }
+   ],
+   "pageable":{
+      "sort":{
+         "sorted":false,
+         "unsorted":true,
+         "empty":true
+      },
+      "pageNumber":0,
+      "pageSize":5,
+      "offset":0,
+      "paged":true,
+      "unpaged":false
+   },
+   "totalPages":2,
+   "totalElements":8,
+   "last":false,
+   "first":true,
+   "sort":{
+      "sorted":false,
+      "unsorted":true,
+      "empty":true
+   },
+   "number":0,
+   "numberOfElements":5,
+   "size":5,
+   "empty":false
+}
+
