@@ -2232,3 +2232,241 @@ Logo, a implementação final da classe tal será:
         "numberOfElements": 5,
         "empty": false
     }
+
+
+--------------------------------------------------------------------------------------------
+OBS: APARTIR DAQUI É ALTERADO O AMBIENTE DE DESENVOLVIMENTO, DO UBUNTU PARA O NOVO DEBIAN 12
+POIS ELE MUDOU AS POLITICAS RELACIONADAS A COMPATIBILIDADES COM FIRMWARES PROPRIETÁRIOS
+
+- PORÉM O NOVO DEBIAN (12) ESTÁ MAIS PESADO E OCUPANDO MAIS MEMÓRIA RAM QUE O ANTERIOR
+ENTÃO AO INVÉS DE TESTAR EM AMBIENTE GRÁFICO COM O POSTMAN, OPTEI PELO CURL QUE É MAIS LEVE
+(LINHA DE COMANDO).
+
+- ALÉM DISTO, POR CONTA DE ALTERAR O S.O, TAMBÉM PERDEU O BANCO DE DADOS, LOGO, AGORA TEMOS
+INFORMAÇÕES DIFERENTES NAS RESPOSTAS JSON!
+---------------------------------------------------------------------------------------------
+-------------> [PREPARANDO NOVO AMBIENTE DE DESENVOLVIMENTO DEBIAN 12] <---------------------
+
+1o - Base de dados vazia:
+$ curl -i http://localhost:8080/animes
+
+HTTP/1.1 200
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Tue, 22 Aug 2023 17:31:25 GMT
+
+{
+   "content":[
+
+   ],
+   "pageable":{
+      "sort":{
+         "sorted":false,
+         "unsorted":true,
+         "empty":true
+      },
+      "pageNumber":0,
+      "pageSize":5,
+      "offset":0,
+      "paged":true,
+      "unpaged":false
+   },
+   "totalPages":0,
+   "totalElements":0,
+   "last":true,
+   "first":true,
+   "sort":{
+      "sorted":false,
+      "unsorted":true,
+      "empty":true
+   },
+   "number":0,
+   "numberOfElements":0,
+   "size":5,
+   "empty":true
+}
+
+-----------------------------------------------------------------------
+
+2o - Alimentando base de dados:
+$ curl -i -d '{"name":"Dragon Ball Z"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Tokyo Ghoul"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Death Note"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Fullmetal Alchemist BH"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Hellsing"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+$ curl -i -d '{"name":"Yuyu Hakusho"}' -H 'Content-Type: application/json' http://localhost:8080/animes
+
+
+-----------------------------------------------------------------------
+
+3o - Realizando GET sem id para executar o getAll() paginado:
+$ curl -i http://localhost:8080/animes
+
+HTTP/1.1 200
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Tue, 22 Aug 2023 18:00:13 GMT
+
+{
+   "content":[
+      {
+         "id":1,
+         "name":null
+      },
+      {
+         "id":2,
+         "name":null
+      },
+      {
+         "id":3,
+         "name":"Dragon Ball Z"
+      },
+      {
+         "id":4,
+         "name":"Tokyo Ghoul"
+      },
+      {
+         "id":5,
+         "name":"Death Note"
+      }
+   ],
+   "pageable":{
+      "sort":{
+         "sorted":false,
+         "unsorted":true,
+         "empty":true
+      },
+      "pageNumber":0,
+      "pageSize":5,
+      "offset":0,
+      "paged":true,
+      "unpaged":false
+   },
+   "totalPages":2,
+   "totalElements":8,
+   "last":false,
+   "first":true,
+   "sort":{
+      "sorted":false,
+      "unsorted":true,
+      "empty":true
+   },
+   "number":0,
+   "numberOfElements":5,
+   "size":5,
+   "empty":false
+}
+
+
+---------------------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 25 - Sorting, Log SQL]: Retornando os elementos em ordem
+ASC ou DESC, sem configurar nada no Backend, bastando passar o parâmetro na URL
+"&sort=[campo],asc", ou seja, delegamos essa responsabilidade para a chamada do Frontend
+Isso é possível pois a implementação da Interface Pageable fornece esse método.
+
+- campo define qual atributo será considerado na ordenação.
+
+    $ curl -i http://localhost:8080/animes?sort=name,asc&size=10
+
+    Content-Type: application/json
+    Transfer-Encoding: chunked
+    Date: Tue, 22 Aug 2023 19:17:44 GMT
+
+    {
+       "content":[
+          {
+             "id":1,
+             "name":null
+          },
+          {
+             "id":2,
+             "name":null
+          },
+          {
+             "id":5,
+             "name":"Death Note"
+          },
+          {
+             "id":3,
+             "name":"Dragon Ball Z"
+          },
+          {
+             "id":6,
+             "name":"Fullmetal Alchemist BH"
+          }
+       ],
+       "pageable":{
+          "sort":{
+             "sorted":true,
+             "unsorted":false,
+             "empty":false
+          },
+          "pageNumber":0,
+          "pageSize":5,
+          "offset":0,
+          "paged":true,
+          "unpaged":false
+       },
+       "totalPages":2,
+       "totalElements":8,
+       "last":false,
+       "first":true,
+       "number":0,
+       "sort":{
+          "sorted":true,
+          "unsorted":false,
+          "empty":false
+       },
+       "numberOfElements":5,
+       "size":5,
+       "empty":false
+    }
+
+    $ curl -i http://localhost:8080/animes?sort=name,desc
+
+    HTTP/1.1 200
+    Content-Type: application/json
+    Transfer-Encoding: chunked
+    Date: Tue, 22 Aug 2023 19:13:04 GMT
+
+    {"content":[{"id":8,"name":"Yuyu Hakusho"},{"id":4,"name":"Tokyo Ghoul"},{"id":7,"name":"Hellsing"},{"id":6,"name":"Fullmetal Alchemist BH"},{"id":3,"name":"Dragon Ball Z"}],"pageable":{"sort":{"sorted":true,"unsorted":false,"empty":false},"pageNumber":0,"pageSize":5,"offset":0,"paged":true,"unpaged":false},"totalPages":2,"totalElements":8,"last":false,"first":true,"number":0,"sort":{"sorted":true,"unsorted":false,"empty":false},"numberOfElements":5,"size":5,"empty":false}
+
+
+---------------------------------------------------------------------------------------------
+[Spring Boot 2 Essentials 26 - RestTemplate getForObject e getForEntity]:
+Realizando requisições para a prórpia API em execução, ou seja, requisições no
+http://localhost:8080/animes/{id}
+
+
+- Cria a pasta "client" no root e nela será centralizado as requisições HTTP
+que seram feitas da API para outros serviços internos relacionados a própria
+aplicação (localhost:8080);
+
+- Nesta pasta cria a classe "SpringClient" e nela define:
+
+	new org.springframework.web.client.RestTemplate();
+
+	- Ele suporta vários métodos HTTP, como por exemplo o GET:
+
+
+	ResponseEntity<AnimeEntity> responseEntity = new org.springframework.web.client.RestTemplate()
+		.getForEntity("http://localhost:8080/api/animes/2", AnimeEntity.class);
+			// AnimeEntity é o tipo do Objeto JSON que será retornado pela API e o prórpio JACKSON vai mapear por nós.
+			// As vantagens do retorno ser encapsulado em um ResponseEntity<> é que ele armazena mais informações sobre a requisição
+				// Como por exemplo o código HTTP, assim podemos utilizar if's para verificar se deu tudo OK (200)
+
+	// As diferenças ente `.getForEntity` e `.getForObject` é apenas o tipo de Retorno!
+	AnimeEntity responseObject = new org.springframework.web.client.RestTemplate()
+		.getForObject("http://localhost:8080/api/animes/2", AnimeEntity.class);
+
+
+
+- MESMAS OPERAÇÕES PORÉM UTILIZANDO PATH VARIABLES:
+
+	ResponseEntity<AnimeEntity> responseEntity = new org.springframework.web.client.RestTemplate()
+		.getForEntity("http://localhost:8080/api/animes/{id1, id2, id3}", AnimeEntity.class, varargs1, varargs2, varargs3...);
+			// Varargs, ou seja, podemos passar vários Path Variables como param!
+
+
+Hibernate: select anime0_.id as id1_0_0_, anime0_.name as name2_0_0_ from tbl_anime anime0_ where anime0_.id=?
+<200,Anime(id=4, name=Tokyo Ghoul),[Content-Type:"application/json", Transfer-Encoding:"chunked", Date:"Thu, 24 Aug 2023 00:12:20 GMT", Keep-Alive:"timeout=60", Connection:"keep-alive"]>
