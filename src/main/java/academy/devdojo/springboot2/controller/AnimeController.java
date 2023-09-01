@@ -40,6 +40,18 @@ public class AnimeController {
 
         return new ResponseEntity<>(animeService.listAll(pageable), HttpStatus.OK);
     }
+    @GetMapping(path = "/listAllNonPageable")
+    public ResponseEntity<List<Anime>> listAllNonPageable() {
+        // Retornar Pageable facilita a vida do frontend, porém em alguns casos
+        // da mais trabalho para o backend pois dificulta o jackson a fazer
+        // mapeamentos automáticos, ou seja, como iremos utilizar chamadas
+        // para a própria API em execução utilizando RestTemplate no ./client
+        // se utilizarmos o com retorno Pageable acima, teriamos que manipular
+        // manualmente o retorno content=[blablabla] e mapear manualmente os
+        // valores do Json para entidades Java.
+
+        return ResponseEntity.ok(animeService.listAllNonPageable());
+    }
     @GetMapping(path = "/{id}")
     public ResponseEntity<Anime> findById(@PathVariable long id) {
        return ResponseEntity.ok(animeService.findByIdOrThrowBadRequestException(id));

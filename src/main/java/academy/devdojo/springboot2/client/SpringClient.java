@@ -1,8 +1,13 @@
 package academy.devdojo.springboot2.client;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import academy.devdojo.springboot2.domain.Anime;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 @Log4j2
@@ -23,5 +28,23 @@ public class SpringClient {
 //    AnimeEntity responseObject = new org.springframework.web.client.RestTemplate()
 //            .getForObject("https://localhost:8080/api/animes/2", AnimeEntity.class);
 
+    }
+    public static void executeHttpGetWithReturnsListAll_array() {
+        Anime[] animes_array = new RestTemplate()
+                .getForObject("http://localhost:8080/animes/listAllNonPageable",
+                               Anime[].class);
+
+        log.info(Arrays.toString(animes_array));
+    }
+    public static void executeHttpGetWithReturnsListAll_ListOrOtherCollection() {
+
+        ResponseEntity<List<Anime>> animes_list = new RestTemplate()
+                .exchange("http://localhost:8080/animes/listAllNonPageable",
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<List<Anime>>() {
+                        });
+
+        log.info(animes_list.getBody());
     }
 }

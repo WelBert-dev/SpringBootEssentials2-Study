@@ -19,5 +19,12 @@ public class ApplicationStarter {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationStarter.class, args);
         SpringClient.execute();
+
+        // Executando request para a prórpia API em execução HTTP GET
+        // no ListAll com retorno Array nativo:
+        SpringClient.executeHttpGetWithReturnsListAll_array();
+        // Executando request para a prórpia API em execução HTTP GET
+        // no ListAll com retorno Collections List:
+        SpringClient.executeHttpGetWithReturnsListAll_ListOrOtherCollection();
     }
 }
