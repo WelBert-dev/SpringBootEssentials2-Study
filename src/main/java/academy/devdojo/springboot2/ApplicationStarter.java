@@ -26,5 +26,23 @@ public class ApplicationStarter {
         // Executando request para a prórpia API em execução HTTP GET
         // no ListAll com retorno Collections List:
         SpringClient.executeHttpGetWithReturnsListAll_ListOrOtherCollection();
+
+        // Executando request para a própria API em execução HTTP POST
+        // Criando um novo recurso:
+        // Obs: Com retorno do Objeto concreto em sí Anime,
+        // não é enpacotado em ResponseEntity<Anime>
+        SpringClient.executeHttpPostWithReturnsObject();
+
+        // Executando request para a própria API em execução HTTP POST
+        // Criando um novo recurso:
+        // Obs: Com retorno do Objeto enpacotado em um ResponseEntity<Anime>
+        SpringClient.executeHttpPostWithReturnsResponseEntityWrapperOfAnime();
+
+        // Executando request para a própria API em execução HTTP POST
+        // Criando um novo recurso:
+        // Obs: Utilizando exchange que possibilita maiores configurações para
+        // a requisição:
+        SpringClient.executeHttpPostWithExchangeBecauseMorePersonalization();
+
     }
 }

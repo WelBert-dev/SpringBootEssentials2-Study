@@ -47,4 +47,45 @@ public class SpringClient {
 
         log.info(animes_list.getBody());
     }
+    public static void executeHttpPostWithReturnsObject() {
+        // Cria o Objeto que será enviado no Body da requisição para salvar utilizando a API:
+        Anime kingdom = Anime.builder()
+                .name("Kingdom")
+                .build();
+
+        Anime responseOfAnimeCreated_object = new RestTemplate()
+                .postForObject("http://localhost:8080/animes",
+                        kingdom,
+                        Anime.class);
+
+        log.info("Saved anime response of Created: {}", responseOfAnimeCreated_object);
+    }
+    public static void executeHttpPostWithReturnsResponseEntityWrapperOfAnime() {
+        // Cria o Objeto que será enviado no Body da requisição para salvar utilizando a API:
+        Anime onePiece = Anime.builder()
+                .name("One Piece Live Action")
+                .build();
+
+        ResponseEntity<Anime> responseOfAnimeCreated_wrapperResponseEntityOfAnime = new RestTemplate()
+                .postForEntity("http://localhost:8080/animes",
+                        onePiece,
+                        Anime.class);
+
+        log.info(responseOfAnimeCreated_wrapperResponseEntityOfAnime.getBody());
+    }
+    public static void executeHttpPostWithExchangeBecauseMorePersonalization() {
+
+        // Cria o Objeto que será enviado no Body da requisição para salvar utilizando a API:
+        Anime jujutsuNoKaisen = Anime.builder()
+                .name("jujutsu no Kaisen")
+                .build();
+
+        ResponseEntity<Anime> responseOfAnimeCreated_exchange = new RestTemplate()
+                .exchange("http://localhost:8080/animes",
+                        HttpMethod.POST,
+                        new HttpEntity<>(jujutsuNoKaisen),
+                        Anime.class);
+
+        log.info(responseOfAnimeCreated_exchange.getBody());
+    }
 }
