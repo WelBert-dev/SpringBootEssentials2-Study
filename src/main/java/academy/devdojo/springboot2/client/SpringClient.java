@@ -88,4 +88,25 @@ public class SpringClient {
 
         log.info(responseOfAnimeCreated_exchange.getBody());
     }
+    public static void executeHttpPostWithExchangeBecauseMorePersonalization_withHttpHeaders() {
+
+        // Cria o Objeto que será enviado no Body da requisição para salvar utilizando a API:
+        Anime kimetsuNoYaiba = Anime.builder()
+                .name("Kimetsu no Yaiba")
+                .build();
+
+        ResponseEntity<Anime> responseOfAnimeCreated_exchange_withHttpHeaders = new RestTemplate()
+                .exchange("http://localhost:8080/animes",
+                        HttpMethod.POST,
+                        new HttpEntity<>(kimetsuNoYaiba, createRequestHeaders_withMimeTypeApplicationJson()),
+                        Anime.class);
+
+        log.info(responseOfAnimeCreated_exchange_withHttpHeaders.getBody());
+    }
+    public static HttpHeaders createRequestHeaders_withMimeTypeApplicationJson() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        return httpHeaders;
+    }
 }

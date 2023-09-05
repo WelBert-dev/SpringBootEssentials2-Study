@@ -41,8 +41,9 @@ public class ApplicationStarter {
         // Executando request para a própria API em execução HTTP POST
         // Criando um novo recurso:
         // Obs: Utilizando exchange que possibilita maiores configurações para
-        // a requisição:
-        SpringClient.executeHttpPostWithExchangeBecauseMorePersonalization();
+        // a requisição, e por conta desta customização na request
+        // passamos um header personalizado nela (Apenas Passando um Mime Type Application/Json como demo):
+        SpringClient.executeHttpPostWithExchangeBecauseMorePersonalization_withHttpHeaders();
 
     }
 }
