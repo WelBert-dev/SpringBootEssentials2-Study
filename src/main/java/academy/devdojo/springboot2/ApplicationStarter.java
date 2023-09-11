@@ -31,19 +31,27 @@ public class ApplicationStarter {
         // Criando um novo recurso:
         // Obs: Com retorno do Objeto concreto em sí Anime,
         // não é enpacotado em ResponseEntity<Anime>
-        SpringClient.executeHttpPostWithReturnsObject();
+//        SpringClient.executeHttpPostWithReturnsObject();
+//
+//        // Executando request para a própria API em execução HTTP POST
+//        // Criando um novo recurso:
+//        // Obs: Com retorno do Objeto enpacotado em um ResponseEntity<Anime>
+//        SpringClient.executeHttpPostWithReturnsResponseEntityWrapperOfAnime();
+//
+//        // Executando request para a própria API em execução HTTP POST
+//        // Criando um novo recurso:
+//        // Obs: Utilizando exchange que possibilita maiores configurações para
+//        // a requisição, e por conta desta customização na request
+//        // passamos um header personalizado nela (Apenas Passando um Mime Type Application/Json como demo):
+//        SpringClient.executeHttpPostWithExchangeBecauseMorePersonalization_withHttpHeaders();
 
-        // Executando request para a própria API em execução HTTP POST
-        // Criando um novo recurso:
-        // Obs: Com retorno do Objeto enpacotado em um ResponseEntity<Anime>
-        SpringClient.executeHttpPostWithReturnsResponseEntityWrapperOfAnime();
-
-        // Executando request para a própria API em execução HTTP POST
-        // Criando um novo recurso:
-        // Obs: Utilizando exchange que possibilita maiores configurações para
-        // a requisição, e por conta desta customização na request
-        // passamos um header personalizado nela (Apenas Passando um Mime Type Application/Json como demo):
-        SpringClient.executeHttpPostWithExchangeBecauseMorePersonalization_withHttpHeaders();
+//        // Executando request para a própria API em execução HTTP PUT
+//        // Atualizando um recurso:
+//        // Obs: Utilizando exchange que possibilita maiores configurações para
+//        // a requisição, pois `new RestTemplate().put()` retorna VOID,
+//        // e queremos retornar pelomenos o HTTP STATUS para o cliente saber qual
+//        // foi a resposta da requisição com amiores detalhes (REST)
+        SpringClient.executeHttpPutWithExchange_BecauseReturnsHttpStatus();
 
     }
 }

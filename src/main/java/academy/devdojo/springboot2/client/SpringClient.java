@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 
 @Log4j2
@@ -108,5 +109,30 @@ public class SpringClient {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         return httpHeaders;
+    }
+    public static void executeHttpPutWithExchange_BecauseReturnsHttpStatus() {
+        // Utilizamos exchange pois podemos personalizar o retorno e retornar
+        // o HTTP STATUS, pois o `new RestTemplate().put()` ou `.delete()` retorna VOID!
+
+        // Pega o anime que será modificado fazendo requisição get:
+        ResponseEntity<Anime> responseEntity = new RestTemplate()
+                .getForEntity("http://localhost:8080/animes/{id}", Anime.class, 4);
+
+        log.info("Anime de ID:4 retornado pelo GET: {}", responseEntity.getBody());
+
+        // Monta o objeto anime que será enviado para o PUT:
+        Anime animeId4 = Anime.builder()
+                .id(responseEntity.getBody().getId())
+                .name(responseEntity.getBody().getName() + " Updated")
+                .build();
+
+        // Finalmente faz a alteração batendo na propria API em execução com o HTTP PUT
+        ResponseEntity<Void> responseOfAnimeUpdated_exchange = new RestTemplate()
+                .exchange("http://localhost:8080/animes",
+                        HttpMethod.PUT,
+                        new HttpEntity<>(animeId4, createRequestHeaders_withMimeTypeApplicationJson()),
+                        Void.class);
+
+        log.info(responseOfAnimeUpdated_exchange.getBody());
     }
 }
