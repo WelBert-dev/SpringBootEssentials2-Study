@@ -158,4 +158,24 @@ public class SpringClient {
                         new HttpEntity<>(responseEntity.getBody(),
                         createRequestHeaders_withMimeTypeApplicationJson()));
     }
+    public static void executeHttpDeleteWithExchange_BecauseReturnsHttpStatus() {
+        // Utilizamos exchange pois podemos personalizar o retorno e retornar
+        // o HTTP STATUS, pois o `new RestTemplate().put()` ou `.delete()` retorna VOID!
+
+        // Pega o anime que será DELETADO, fazendo requisição get:
+        ResponseEntity<Anime> responseEntity = new RestTemplate()
+                .getForEntity("http://localhost:8080/animes/{id}", Anime.class, 4);
+
+        log.info("Anime de ID:4 retornado pelo GET que sera DELETADO: {}", responseEntity.getBody());
+
+        // Finalmente faz a alteração batendo na propria API em execução com o HTTP PUT
+        ResponseEntity<Void> responseOfAnimeDeleted_exchange = new RestTemplate()
+                .exchange("http://localhost:8080/animes/{id}",
+                        HttpMethod.DELETE,
+                        null,
+                        Void.class,
+                        responseEntity.getBody().getId());
+
+        log.info(responseOfAnimeDeleted_exchange.getBody());
+    }
 }

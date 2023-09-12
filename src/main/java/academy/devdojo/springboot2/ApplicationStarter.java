@@ -53,11 +53,18 @@ public class ApplicationStarter {
 //        // foi a resposta da requisição com amiores detalhes (REST)
 //        SpringClient.executeHttpPutWithExchange_BecauseReturnsHttpStatus();
 
-        // Executando request para a própria API em execução HTTP PUT
-        // Atualizando um recurso:
-        // Obs: Utilizando o especializado `new RestTemplate().put()`
-        // que NÃO Retorna nada, ou seja, Não é possivel acessar o HTTP STATUS CODE
-        SpringClient.executeHttpPut_NonReturnsHttpStatus();
+//        // Executando request para a própria API em execução HTTP PUT
+//        // Atualizando um recurso:
+//        // Obs: Utilizando o especializado `new RestTemplate().put()`
+//        // que NÃO Retorna nada, ou seja, Não é possivel acessar o HTTP STATUS CODE
+//        SpringClient.executeHttpPut_NonReturnsHttpStatus();
 
+        // Executando request para a própria API em execução HTTP DELETE
+        // Deletando um recurso com path variable {id}:
+        // Obs: Utilizando exchange que possibilita maiores configurações para
+        // a requisição, pois `new RestTemplate().delete()` retorna VOID,
+        // e queremos retornar pelomenos o HTTP STATUS para o cliente saber qual
+        // foi a resposta da requisição com maiores detalhes (REST)
+        SpringClient.executeHttpDeleteWithExchange_BecauseReturnsHttpStatus();
     }
 }
