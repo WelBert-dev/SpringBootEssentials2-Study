@@ -18,19 +18,19 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationStarter {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationStarter.class, args);
-        SpringClient.execute();
-
-        // Executando request para a prórpia API em execução HTTP GET
-        // no ListAll com retorno Array nativo:
-        SpringClient.executeHttpGetWithReturnsListAll_array();
-        // Executando request para a prórpia API em execução HTTP GET
-        // no ListAll com retorno Collections List:
-        SpringClient.executeHttpGetWithReturnsListAll_ListOrOtherCollection();
-
-        // Executando request para a própria API em execução HTTP POST
-        // Criando um novo recurso:
-        // Obs: Com retorno do Objeto concreto em sí Anime,
-        // não é enpacotado em ResponseEntity<Anime>
+//        SpringClient.execute();
+//
+//        // Executando request para a prórpia API em execução HTTP GET
+//        // no ListAll com retorno Array nativo:
+//        SpringClient.executeHttpGetWithReturnsListAll_array();
+//        // Executando request para a prórpia API em execução HTTP GET
+//        // no ListAll com retorno Collections List:
+//        SpringClient.executeHttpGetWithReturnsListAll_ListOrOtherCollection();
+//
+//        // Executando request para a própria API em execução HTTP POST
+//        // Criando um novo recurso:
+//        // Obs: Com retorno do Objeto concreto em sí Anime,
+//        // não é enpacotado em ResponseEntity<Anime>
 //        SpringClient.executeHttpPostWithReturnsObject();
 //
 //        // Executando request para a própria API em execução HTTP POST
@@ -59,12 +59,18 @@ public class ApplicationStarter {
 //        // que NÃO Retorna nada, ou seja, Não é possivel acessar o HTTP STATUS CODE
 //        SpringClient.executeHttpPut_NonReturnsHttpStatus();
 
+//        // Executando request para a própria API em execução HTTP DELETE
+//        // Deletando um recurso com path variable {id}:
+//        // Obs: Utilizando exchange que possibilita maiores configurações para
+//        // a requisição, pois `new RestTemplate().delete()` retorna VOID,
+//        // e queremos retornar pelomenos o HTTP STATUS para o cliente saber qual
+//        // foi a resposta da requisição com maiores detalhes (REST)
+//        SpringClient.executeHttpDeleteWithExchange_BecauseReturnsHttpStatus();
+
         // Executando request para a própria API em execução HTTP DELETE
         // Deletando um recurso com path variable {id}:
-        // Obs: Utilizando exchange que possibilita maiores configurações para
-        // a requisição, pois `new RestTemplate().delete()` retorna VOID,
-        // e queremos retornar pelomenos o HTTP STATUS para o cliente saber qual
-        // foi a resposta da requisição com maiores detalhes (REST)
-        SpringClient.executeHttpDeleteWithExchange_BecauseReturnsHttpStatus();
+        // Obs: Utilizando o especializado `new RestTemplate().delete()`
+        // que NÃO Retorna nada, ou seja, Não é possivel acessar o HTTP STATUS CODE
+        SpringClient.executeHttpDelete_NonReturnsHttpStatus();
     }
 }

@@ -178,4 +178,21 @@ public class SpringClient {
 
         log.info(responseOfAnimeDeleted_exchange.getBody());
     }
+    public static void executeHttpDelete_NonReturnsHttpStatus() {
+        // Sem o uso do exchange() que possibilita maiores configurações na requisição,
+        // por conta disto o retorno deste .delete() NÃO TEM RETORNO, ou seja,
+        // NÃO é possível retornar o Status Code HTTP
+
+        // Pega o anime que será deletado, fazendo requisição get:
+        ResponseEntity<Anime> responseEntity = new RestTemplate()
+                .getForEntity("http://localhost:8080/animes/{id}", Anime.class, 5);
+
+        log.info("Anime de ID:5 retornado pelo GET: {}", responseEntity.getBody());
+
+        // Finalmente faz a deleção batendo na propria API em execução com o HTTP DELETE
+
+        new RestTemplate()
+                .delete("http://localhost:8080/animes/{id}",
+                        responseEntity.getBody().getId());
+    }
 }
