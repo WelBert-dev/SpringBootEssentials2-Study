@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -134,5 +135,27 @@ public class SpringClient {
                         Void.class);
 
         log.info(responseOfAnimeUpdated_exchange.getBody());
+    }
+    public static void executeHttpPut_NonReturnsHttpStatus() {
+        // Sem o uso do exchange() que possibilita maiores configurações na requisição,
+        // por conta disto o retorno deste .put() NÃO TEM RETORNO, ou seja,
+        // NÃO é possível retornar o Status Code HTTP
+
+        // Pega o anime que será modificado fazendo requisição get:
+        ResponseEntity<Anime> responseEntity = new RestTemplate()
+                .getForEntity("http://localhost:8080/animes/{id}", Anime.class, 4);
+
+        log.info("Anime de ID:4 retornado pelo GET: {}", responseEntity.getBody());
+
+        // Altera nome do anime para saber que modificou, já que não tem retornos:
+        Objects.requireNonNull(responseEntity.getBody())
+                .setName(responseEntity.getBody().getName() + "UPDATED NON RETURNS");
+
+        // Finalmente faz a alteração batendo na propria API em execução com o HTTP PUT
+
+        new RestTemplate()
+                .put("http://localhost:8080/animes/",
+                        new HttpEntity<>(responseEntity.getBody(),
+                        createRequestHeaders_withMimeTypeApplicationJson()));
     }
 }
