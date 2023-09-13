@@ -10,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring") // possibilita fazer dependency injection
 public abstract class AnimeMapper {
     public static final AnimeMapper INSTANCE = Mappers.getMapper(AnimeMapper.class);
-    @Mapping(target = "name", source = "animePostRequestBodyDTO.name")
+//    @Mapping(target = "name", source = "animePostRequestBodyDTO.name")
     public abstract Anime toAnime(AnimePostRequestBodyDTO animePostRequestBodyDTO);
     public abstract Anime toAnime(AnimePutRequestBodyDTO animeputRequestBodyDTO);
 }

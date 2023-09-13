@@ -67,10 +67,10 @@ public class ApplicationStarter {
 //        // foi a resposta da requisição com maiores detalhes (REST)
 //        SpringClient.executeHttpDeleteWithExchange_BecauseReturnsHttpStatus();
 
-        // Executando request para a própria API em execução HTTP DELETE
-        // Deletando um recurso com path variable {id}:
-        // Obs: Utilizando o especializado `new RestTemplate().delete()`
-        // que NÃO Retorna nada, ou seja, Não é possivel acessar o HTTP STATUS CODE
-        SpringClient.executeHttpDelete_NonReturnsHttpStatus();
+//        // Executando request para a própria API em execução HTTP DELETE
+//        // Deletando um recurso com path variable {id}:
+//        // Obs: Utilizando o especializado `new RestTemplate().delete()`
+//        // que NÃO Retorna nada, ou seja, Não é possivel acessar o HTTP STATUS CODE
+//        SpringClient.executeHttpDelete_NonReturnsHttpStatus();
     }
 }
