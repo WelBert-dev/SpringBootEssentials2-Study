@@ -24,6 +24,20 @@ class AnimeRepositoryTest {
         Assertions.assertThat(animeSaved.getId()).isNotNull();
         Assertions.assertThat(animeSaved.getName()).isEqualTo(animeToBeSaved.getName());
     }
+    @Test
+    @DisplayName("Save updates anime when Successful")
+    public void whenUpdate_thenChangeAndPersistData () {
+        Anime animeToBeSaved = createAnime();
+        Anime animeSaved = this.animeRepository.save(animeToBeSaved);
+
+        animeSaved.setName(animeSaved.getName() + " Updated");
+
+        Anime animeUpdated = this.animeRepository.save(animeToBeSaved);
+
+        Assertions.assertThat(animeUpdated).isNotNull();
+        Assertions.assertThat(animeUpdated.getId()).isNotNull();
+        Assertions.assertThat(animeUpdated.getName()).isEqualTo(animeSaved.getName());
+    }
     private Anime createAnime() {
         return Anime.builder()
                 .name("One Piece Live Action 2023")
