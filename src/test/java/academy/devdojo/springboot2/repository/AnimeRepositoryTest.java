@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
@@ -51,6 +52,29 @@ class AnimeRepositoryTest {
         Optional<Anime> animeDeletedOptional = this.animeRepository.findById(animeSaved.getId());
 
         Assertions.assertThat(animeDeletedOptional).isEmpty();
+    }
+    @Test
+    @DisplayName("Find By Name returns list of anime when Successful")
+    public void whenFindByName_thenReturnsListOfAnime () {
+        Anime animeToBeSaved = createAnime();
+        Anime animeSaved = this.animeRepository.save(animeToBeSaved);
+
+        String name = animeSaved.getName();
+        List<Anime> animes = this.animeRepository.findByName(name);
+        // O padrão do findByName quando o anime é not found, é
+        // retornar uma empty list "[]", mas é bom validar esse
+        // comportamente para garantir que ele não foi alterado
+        // Validação abaixo
+
+        Assertions.assertThat(animes).isNotEmpty();
+        Assertions.assertThat(animes).contains(animeSaved);
+    }
+    @Test
+    @DisplayName("Find By Name returns empty list of anime when anime is not found")
+    public void whenFindByName_AndAnimeIsNotFound_thenReturnsEmptyListOfAnime () {
+        List<Anime> animes = this.animeRepository.findByName("nome inexistente este");
+
+        Assertions.assertThat(animes).isEmpty();
     }
     private Anime createAnime() {
         return Anime.builder()
