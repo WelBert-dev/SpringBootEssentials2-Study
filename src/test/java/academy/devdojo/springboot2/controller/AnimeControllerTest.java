@@ -42,8 +42,14 @@ class AnimeControllerTest {
         PageImpl<Anime> animePage = new PageImpl<Anime>(List.of(AnimeCreator.createValidAnime()));
 
         // Quando alguem chamas o listAll no service, retorna o animePage
+        // alimenta para este: list_ReturnsListOfAnimeInsidePageObject_WhenSuccessful()
         BDDMockito.when(this.animeServiceMock.listAll(ArgumentMatchers.any()))
                 .thenReturn(animePage);
+
+        // Quando alguem chama o listAllNonPageable no service, retorna List<Anime>
+        // alimenta para este: listAllNonPageable_ReturnsListOfAnime_WhenSuccessful()
+        BDDMockito.when(this.animeServiceMock.listAllNonPageable())
+                .thenReturn(List.of(AnimeCreator.createValidAnime()));
     }
     @Test
     @DisplayName("List returns list of anime inside page object when successful")
@@ -59,5 +65,19 @@ class AnimeControllerTest {
                 .hasSize(1);
 
         Assertions.assertThat(animePage.toList().get(0).getName()).isEqualTo(expectedName);
+    }
+    @Test
+    @DisplayName("ListAll returns list of anime when successful")
+    void listAllNonPageable_ReturnsListOfAnime_WhenSuccessful() {
+
+        String expectedName = AnimeCreator.createValidAnime().getName();
+        List<Anime> animesList = animeController.listAllNonPageable().getBody();
+
+        Assertions.assertThat(animesList)
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        Assertions.assertThat(animesList.get(0).getName()).isEqualTo(expectedName);
     }
 }
