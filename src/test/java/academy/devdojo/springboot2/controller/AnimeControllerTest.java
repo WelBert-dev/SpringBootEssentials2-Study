@@ -15,6 +15,8 @@ import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
@@ -66,9 +68,13 @@ class AnimeControllerTest {
                 .thenReturn(List.of(AnimeCreator.createValidAnime()));
 
         // Quando alguem chama o save no service, e É A ESTRUTURA DE UM ANIME VÁLIDO retorna o anime
-        // alimenta para este:
+        // alimenta para este: save_ReturnsAnime_WhenSuccessful
         BDDMockito.when(this.animeServiceMock.save(ArgumentMatchers.any(AnimePostRequestBodyDTO.class)))
                 .thenReturn(AnimeCreator.createValidAnime());
+
+        // Quando alguem chama o delete no service, retorna empty body but HttpStatus No Content
+        // alimenta para este: delete_RemovesAndReturnsEmptyBody_ButHttpStatusNoContent_WhenSuccessful
+        BDDMockito.doNothing().when(this.animeServiceMock).delete(ArgumentMatchers.anyLong());
 
     }
     @Test
@@ -147,5 +153,15 @@ class AnimeControllerTest {
         Anime anime = animeController.save(AnimePostRequestBodyDTOCreator.createAnimePostRequestBodyDTO()).getBody();
 
         Assertions.assertThat(anime).isNotNull().isEqualTo(AnimeCreator.createValidAnime());
+    }
+    @Test
+    @DisplayName("delete removes and returns empty body but HttpStatus.NO_CONTENT when successful")
+    void delete_RemovesAndReturnsEmptyBody_ButHttpStatusNoContent_WhenSuccessful() {
+
+        Assertions.assertThatCode(()->animeController.delete(1)).doesNotThrowAnyException();
+
+        ResponseEntity<Void> responseEmptyButHttpStatusNoContent = animeController.delete(1);
+        Assertions.assertThat(responseEmptyButHttpStatusNoContent).isNotNull();
+        Assertions.assertThat(responseEmptyButHttpStatusNoContent.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 }
