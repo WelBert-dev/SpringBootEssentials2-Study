@@ -1,6 +1,7 @@
 package academy.devdojo.springboot2.service;
 
 import academy.devdojo.springboot2.domain.Anime;
+import academy.devdojo.springboot2.exceptions.httpRequest.BadRequestException;
 import academy.devdojo.springboot2.repository.AnimeRepository;
 import academy.devdojo.springboot2.util.AnimeCreator;
 import academy.devdojo.springboot2.util.AnimePostRequestBodyDTOCreator;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class) // indica que queremos utilizar o JUnit com o Spring
 class AnimeServiceTest {
-
     // Utiliza-se quando vamos mockar a classe em sí
     @InjectMocks
     private AnimeService animeService;
@@ -38,7 +39,6 @@ class AnimeServiceTest {
 
     @BeforeEach
     void setUp() {
-
         BDDMockito.when(this.animeRepositoryMock.findAll(ArgumentMatchers.any(PageRequest.class)))
                 .thenReturn(new PageImpl<Anime>(List.of(AnimeCreator.createValidAnime())));
 
@@ -95,6 +95,18 @@ class AnimeServiceTest {
         Assertions.assertThat(expectedAnime).isNotNull();
 
         Assertions.assertThat(expectedAnime.getId()).isEqualTo(expectedID);
+    }
+    @Test
+    @DisplayName("findByIdOrThrowBadRequestException throws BadRequestException when Anime is not found")
+    void findByIdOrThrowBadRequestException_ThrowsBadRequestException_WhenAnimeIsNotFound() {
+        // Para cenários NOT SUCCESS é interessante settar esse mock
+        // aqui dentro do próprio método de teste!
+        BDDMockito.when(this.animeRepositoryMock.findById(ArgumentMatchers.anyLong()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> this.animeService.findByIdOrThrowBadRequestException(1L))
+                .withMessageContaining("Anime Not Found");
     }
     @Test
     @DisplayName("findByName returns the list of animes with contains the same name, when successful")
