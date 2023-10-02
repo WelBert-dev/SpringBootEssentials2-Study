@@ -1,8 +1,10 @@
 package academy.devdojo.springboot2.controller;
 
 import academy.devdojo.springboot2.domain.Anime;
+import academy.devdojo.springboot2.requests.anime.AnimePostRequestBodyDTO;
 import academy.devdojo.springboot2.service.AnimeService;
 import academy.devdojo.springboot2.util.AnimeCreator;
+import academy.devdojo.springboot2.util.AnimePostRequestBodyDTOCreator;
 import academy.devdojo.springboot2.util.DateUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,15 +55,20 @@ class AnimeControllerTest {
 
         // Quando alguem chama o findByIdOrThrowBadRequestException no service,
         // retorna o mesmo anime de todos os testes, independentemente do ID de argumento
-        // alimenta para este:
+        // alimenta para este: findById_WithAnyID_ReturnsTheSameAnimeAllTimes_WhenSuccessful()
         BDDMockito.when(this.animeServiceMock.findByIdOrThrowBadRequestException(ArgumentMatchers.anyLong()))
                 .thenReturn(AnimeCreator.createValidAnime());
 
         // Quando alguem chama o findByName no service,
         // retorna List<Anime> contendo todas as ocorrências de mesmo name, neste caso contendo apenas um anime
-        // alimenta para este:
+        // alimenta para este: findByName_ReturnsTheListOfAnimeWithContainsTheSameName_WhenSuccessful
         BDDMockito.when(this.animeServiceMock.findByName(ArgumentMatchers.anyString()))
                 .thenReturn(List.of(AnimeCreator.createValidAnime()));
+
+        // Quando alguem chama o save no service, e É A ESTRUTURA DE UM ANIME VÁLIDO retorna o anime
+        // alimenta para este:
+        BDDMockito.when(this.animeServiceMock.save(ArgumentMatchers.any(AnimePostRequestBodyDTO.class)))
+                .thenReturn(AnimeCreator.createValidAnime());
 
     }
     @Test
@@ -132,5 +139,13 @@ class AnimeControllerTest {
         Assertions.assertThat(animesListEmpty)
                 .isNotNull() // pois é "[]" então != null
                 .isEmpty();
+    }
+    @Test
+    @DisplayName("save returns a anime when successful")
+    void save_ReturnsAnime_WhenSuccessful() {
+
+        Anime anime = animeController.save(AnimePostRequestBodyDTOCreator.createAnimePostRequestBodyDTO()).getBody();
+
+        Assertions.assertThat(anime).isNotNull().isEqualTo(AnimeCreator.createValidAnime());
     }
 }
