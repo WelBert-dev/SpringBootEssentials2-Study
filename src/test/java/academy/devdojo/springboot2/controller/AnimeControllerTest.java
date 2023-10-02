@@ -2,9 +2,11 @@ package academy.devdojo.springboot2.controller;
 
 import academy.devdojo.springboot2.domain.Anime;
 import academy.devdojo.springboot2.requests.anime.AnimePostRequestBodyDTO;
+import academy.devdojo.springboot2.requests.anime.AnimePutRequestBodyDTO;
 import academy.devdojo.springboot2.service.AnimeService;
 import academy.devdojo.springboot2.util.AnimeCreator;
 import academy.devdojo.springboot2.util.AnimePostRequestBodyDTOCreator;
+import academy.devdojo.springboot2.util.AnimePutRequestBodyDTOCreator;
 import academy.devdojo.springboot2.util.DateUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,6 +77,10 @@ class AnimeControllerTest {
         // Quando alguem chama o delete no service, retorna empty body but HttpStatus No Content
         // alimenta para este: delete_RemovesAndReturnsEmptyBody_ButHttpStatusNoContent_WhenSuccessful
         BDDMockito.doNothing().when(this.animeServiceMock).delete(ArgumentMatchers.anyLong());
+
+        // Quando alguem chama o replace no service, retorna empty body but HttpStatus No Content
+        // alimenta para este: replace_UpdatesAndReturnsEmptyBody_ButHttpStatusNoContent_WhenSuccessful
+        BDDMockito.doNothing().when(this.animeServiceMock).replace(ArgumentMatchers.any(AnimePutRequestBodyDTO.class));
 
     }
     @Test
@@ -161,6 +167,16 @@ class AnimeControllerTest {
         Assertions.assertThatCode(()->animeController.delete(1)).doesNotThrowAnyException();
 
         ResponseEntity<Void> responseEmptyButHttpStatusNoContent = animeController.delete(1);
+        Assertions.assertThat(responseEmptyButHttpStatusNoContent).isNotNull();
+        Assertions.assertThat(responseEmptyButHttpStatusNoContent.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+    @Test
+    @DisplayName("replace updates and returns empty body but HttpStatus.NO_CONTENT when successful")
+    void replace_UpdatesAndReturnsEmptyBody_ButHttpStatusNoContent_WhenSuccessful() {
+
+        Assertions.assertThatCode(()->animeController.replace(AnimePutRequestBodyDTOCreator.createAnimePutRequestBodyDTO())).doesNotThrowAnyException();
+
+        ResponseEntity<Void> responseEmptyButHttpStatusNoContent = animeController.replace(AnimePutRequestBodyDTOCreator.createAnimePutRequestBodyDTO());
         Assertions.assertThat(responseEmptyButHttpStatusNoContent).isNotNull();
         Assertions.assertThat(responseEmptyButHttpStatusNoContent.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
