@@ -105,6 +105,20 @@ class AnimeControllerTest {
         Assertions.assertThat(expectedAnime.getId()).isEqualTo(expectedID);
     }
     @Test
+    @DisplayName("findByName returns the list of animes with contains the same name, when successful")
+    void findByName_ReturnsTheListOfAnimeWithContainsTheSameName_WhenSuccessful() {
+
+        String expectedName = AnimeCreator.createValidAnime().getName();
+        List<Anime> animesListWithContainsTheSameName = animeController.findByName(expectedName).getBody();
+
+        Assertions.assertThat(animesListWithContainsTheSameName)
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        Assertions.assertThat(animesListWithContainsTheSameName.get(0).getName()).isEqualTo(expectedName);
+    }
+    @Test
     @DisplayName("findByName returns an empty list, when anime is not found")
     void findByName_ReturnsTheEmptyList_WhenAnimeIsNotFound() {
 
