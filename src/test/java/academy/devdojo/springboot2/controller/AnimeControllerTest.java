@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 //@SpringBootTest // Ele vai inicializar o contexto tôdo, ou seja,
@@ -61,6 +62,7 @@ class AnimeControllerTest {
         // alimenta para este:
         BDDMockito.when(this.animeServiceMock.findByName(ArgumentMatchers.anyString()))
                 .thenReturn(List.of(AnimeCreator.createValidAnime()));
+
     }
     @Test
     @DisplayName("List returns list of anime inside page object when successful")
@@ -103,17 +105,18 @@ class AnimeControllerTest {
         Assertions.assertThat(expectedAnime.getId()).isEqualTo(expectedID);
     }
     @Test
-    @DisplayName("findByName returns the list of animes with contains the same name, when successful")
-    void findByName_ReturnsTheListOfAnimeWithContainsTheSameName_WhenSuccessful() {
+    @DisplayName("findByName returns an empty list, when anime is not found")
+    void findByName_ReturnsTheEmptyList_WhenAnimeIsNotFound() {
 
-        String expectedName = AnimeCreator.createValidAnime().getName();
-        List<Anime> animesListWithContainsTheSameName = animeController.findByName(expectedName).getBody();
+        // Para cenários Not Successful é interessante definir o comportamento
+        // do mock dentro do teste que utiliza aquele cenário especifico:
+        BDDMockito.when(this.animeServiceMock.findByName(ArgumentMatchers.anyString()))
+                .thenReturn(Collections.emptyList());
 
-        Assertions.assertThat(animesListWithContainsTheSameName)
-                .isNotNull()
-                .isNotEmpty()
-                .hasSize(1);
+        List<Anime> animesListEmpty = animeController.findByName("Not Exists this anime").getBody();
 
-        Assertions.assertThat(animesListWithContainsTheSameName.get(0).getName()).isEqualTo(expectedName);
+        Assertions.assertThat(animesListEmpty)
+                .isNotNull() // pois é "[]" então != null
+                .isEmpty();
     }
 }
