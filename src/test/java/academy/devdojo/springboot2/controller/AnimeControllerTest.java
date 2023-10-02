@@ -39,16 +39,27 @@ class AnimeControllerTest {
     // esse comportamento esperado da classe mockada a cima
     @BeforeEach
     void setUp() {
-        PageImpl<Anime> animePage = new PageImpl<Anime>(List.of(AnimeCreator.createValidAnime()));
 
         // Quando alguem chamas o listAll no service, retorna o animePage
         // alimenta para este: list_ReturnsListOfAnimeInsidePageObject_WhenSuccessful()
         BDDMockito.when(this.animeServiceMock.listAll(ArgumentMatchers.any()))
-                .thenReturn(animePage);
+                .thenReturn(new PageImpl<Anime>(List.of(AnimeCreator.createValidAnime())));
 
         // Quando alguem chama o listAllNonPageable no service, retorna List<Anime>
         // alimenta para este: listAllNonPageable_ReturnsListOfAnime_WhenSuccessful()
         BDDMockito.when(this.animeServiceMock.listAllNonPageable())
+                .thenReturn(List.of(AnimeCreator.createValidAnime()));
+
+        // Quando alguem chama o findByIdOrThrowBadRequestException no service,
+        // retorna o mesmo anime de todos os testes, independentemente do ID de argumento
+        // alimenta para este:
+        BDDMockito.when(this.animeServiceMock.findByIdOrThrowBadRequestException(ArgumentMatchers.anyLong()))
+                .thenReturn(AnimeCreator.createValidAnime());
+
+        // Quando alguem chama o findByName no service,
+        // retorna List<Anime> contendo todas as ocorrências de mesmo name, neste caso contendo apenas um anime
+        // alimenta para este:
+        BDDMockito.when(this.animeServiceMock.findByName(ArgumentMatchers.anyString()))
                 .thenReturn(List.of(AnimeCreator.createValidAnime()));
     }
     @Test
@@ -79,5 +90,30 @@ class AnimeControllerTest {
                 .hasSize(1);
 
         Assertions.assertThat(animesList.get(0).getName()).isEqualTo(expectedName);
+    }
+    @Test
+    @DisplayName("findById with any ID because returns the same anime all times, when successful")
+    void findById_WithAnyID_ReturnsTheSameAnimeAllTimes_WhenSuccessful() {
+
+        long expectedID = AnimeCreator.createValidAnime().getId();
+        Anime expectedAnime = animeController.findById(1L).getBody();
+
+        Assertions.assertThat(expectedAnime).isNotNull();
+
+        Assertions.assertThat(expectedAnime.getId()).isEqualTo(expectedID);
+    }
+    @Test
+    @DisplayName("findByName returns the list of animes with contains the same name, when successful")
+    void findByName_ReturnsTheListOfAnimeWithContainsTheSameName_WhenSuccessful() {
+
+        String expectedName = AnimeCreator.createValidAnime().getName();
+        List<Anime> animesListWithContainsTheSameName = animeController.findByName(expectedName).getBody();
+
+        Assertions.assertThat(animesListWithContainsTheSameName)
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1);
+
+        Assertions.assertThat(animesListWithContainsTheSameName.get(0).getName()).isEqualTo(expectedName);
     }
 }
